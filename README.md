@@ -93,16 +93,14 @@ pct exec 213 -- journalctl -u dz-route-analyzer -n 100 --no-pager
 
 ## Updating an existing installation
 
-Back up the local database and configuration before updating. The GitHub repository is the source of truth for application code, while `.env` and `data/measurements.sqlite3` are local state and should be retained.
+The updater makes a timestamped backup of `.env` and `data/` under `/root/`, pulls the latest GitHub code, installs dependencies, and restarts the service. Run it inside the existing LXC as root:
 
 ```bash
 cd /opt/dz-route-analyzer
-sudo cp -a .env data "/root/dz-route-analyzer-backup-$(date +%F)"
-sudo git pull --ff-only
-sudo bash install.sh
-sudo systemctl restart dz-route-analyzer
-sudo systemctl status dz-route-analyzer --no-pager
+sudo bash update.sh
 ```
+
+If the repository was cloned to a different path, substitute that path. If the update fails, the backup path is printed before the update begins.
 
 If the repository was cloned to a different path, substitute that path for `/opt/dz-route-analyzer`.
 
