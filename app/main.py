@@ -243,6 +243,8 @@ button:hover{border-color:#5d8de5;transform:translateY(-1px)}button.primary{back
 
 const translations={
 en:{
+"عرض سجل عناوين IP التفصيلي":"Show detailed public IP history",
+"عرض تفاصيل اختبارات الاتصال":"Show connection test details",
 "Internet connection intelligence · Algérie Télécom":"Internet connection insights · Algérie Télécom",
 "↻ Refresh":"↻ Refresh","▶ Collect now":"▶ Collect now","Collecting…":"Collecting…",
 "Current observed public IPv4":"Your public IP address","◉ Waiting for first observation":"◉ Waiting for first check",
@@ -260,6 +262,8 @@ en:{
 "جاهز لجمع البيانات":"Ready to measure your connection","جارٍ الاتصال بخدمة التحقق من عنوان الإنترنت":"Checking your public IP address","تم رصد عنوان الإنترنت؛ جارٍ تصنيف المجموعة":"Public IP found; identifying its group","جارٍ قياس زمن الاستجابة وفقدان الحزم":"Measuring latency and packet loss","جارٍ حفظ النتائج في السجل التاريخي":"Saving results to your history","اكتملت عملية القياس بنجاح":"Measurement completed successfully","تعذّر إكمال العملية":"Could not complete the measurement"
 },
 fr:{
+"عرض سجل عناوين IP التفصيلي":"Afficher l’historique détaillé des IP publiques",
+"عرض تفاصيل اختبارات الاتصال":"Afficher les détails des tests réseau",
 "Internet connection intelligence · Algérie Télécom":"Analyse de connexion · Algérie Télécom",
 "↻ Refresh":"↻ Actualiser","▶ Collect now":"▶ Tester maintenant","Collecting…":"Mesure en cours…",
 "Current observed public IPv4":"Votre adresse IP publique","◉ Waiting for first observation":"◉ En attente du premier test",
@@ -292,6 +296,7 @@ ar:{
 "جاهز لجمع البيانات":"جاهز لقياس الاتصال","جارٍ الاتصال بخدمة التحقق من عنوان الإنترنت":"جارٍ التحقق من عنوان الإنترنت العام","تم رصد عنوان الإنترنت؛ جارٍ تصنيف المجموعة":"تم رصد العنوان؛ جارٍ تحديد مجموعته","جارٍ قياس زمن الاستجابة وفقدان الحزم":"جارٍ قياس زمن الاستجابة وفقدان الحزم","جارٍ حفظ النتائج في السجل التاريخي":"جارٍ حفظ النتائج في السجل","اكتملت عملية القياس بنجاح":"اكتمل القياس بنجاح","تعذّر إكمال العملية":"تعذّر إكمال القياس"
 }};
 const originalText=new WeakMap();
+const originalSummary=new WeakMap();
 function setLanguage(lang){
  if(!translations[lang])lang='en';
  document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
@@ -313,7 +318,12 @@ function translatePage(lang){
   const translated=dict[original];
   if(translated){const leading=originalText.get(node).match(/^\s*/)?.[0]||'';const trailing=originalText.get(node).match(/\s*$/)?.[0]||'';const desired=leading+translated+trailing;if(node.nodeValue!==desired)node.nodeValue=desired;}
  }
- document.querySelectorAll('summary').forEach(el=>{const t=el.textContent.trim();if(dict[t])el.textContent=dict[t]});
+ document.querySelectorAll('summary').forEach(el=>{
+  if(!originalSummary.has(el))originalSummary.set(el,el.textContent.trim());
+  const original=originalSummary.get(el);
+  const translated=dict[original];
+  if(translated&&el.textContent.trim()!==translated)el.textContent=translated;
+ });
 }
 const languageObserver=new MutationObserver(records=>{if(records.some(r=>r.type==='childList')){const lang=document.documentElement.lang||'en';translatePage(lang)}});
 languageObserver.observe(document.body,{childList:true,subtree:true});
