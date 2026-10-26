@@ -3,9 +3,9 @@ set -Eeuo pipefail
 
 APP_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 APP_NAME="dz-route-analyzer"
-CYAN='\033[36m'
-GREEN='\033[32m'
-BOLD='\033[1m'
+CYAN=$'\033[36m'
+GREEN=$'\033[32m'
+BOLD=$'\033[1m'
 progress() {
   printf "\r%s[%3d%%] %s\033[0m\n" "$CYAN$BOLD" "$1" "$2"
 }
@@ -35,7 +35,7 @@ progress 90 "Restarting monitoring service"
 systemctl restart "${APP_NAME}.service"
 if systemctl is-active --quiet "${APP_NAME}.service"; then
   progress 100 "Update completed successfully"
-  printf "%s✓ Dashboard is running%s\n" "$GREEN$BOLD" '\033[0m'
+  printf "%s✓ Dashboard is running\033[0m\n" "$GREEN$BOLD"
 else
   echo "Update finished but the service is not active. Check: journalctl -u ${APP_NAME} -n 80 --no-pager" >&2
   exit 1
