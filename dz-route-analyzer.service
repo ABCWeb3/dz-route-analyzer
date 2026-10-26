@@ -1,0 +1,28 @@
+[Unit]
+Description=DZ Route Analyzer web application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dz-route-analyzer
+Group=dz-route-analyzer
+WorkingDirectory=/opt/dz-route-analyzer
+EnvironmentFile=/opt/dz-route-analyzer/.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/dz-route-analyzer/.venv/bin/uvicorn app.main:app --host ${WEB_HOST} --port ${WEB_PORT}
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/dz-route-analyzer/data
+AmbientCapabilities=CAP_NET_RAW
+CapabilityBoundingSet=CAP_NET_RAW
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target
