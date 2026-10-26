@@ -1,33 +1,26 @@
 # DZ Route Analyzer
 
-A lightweight network diagnostics dashboard designed to run directly on Debian 13 inside a Proxmox LXC container. **Docker is not required.**
+A lightweight native Debian 13 / Proxmox LXC dashboard for discovering IPv4 prefixes announced by configured ASNs, collecting repeatable measurements, and comparing historical latency and packet loss. Docker is not required.
 
-## Features
+## What it does
 
-- Web dashboard and JSON API powered by FastAPI.
-- Ping measurements: latency, packet loss, and command errors reported separately.
-- Traceroute diagnostics.
-- Configurable targets and test settings.
-- One-command installation and a systemd service for automatic startup.
+- Discovers IPv4 prefixes announced in public routing data via RIPEstat.
+- Defaults to `AS33779` as the Algeria Telecom ASN; verify the ASN against current official/provider routing data before drawing conclusions.
+- Stores discovered prefixes, individual measurements, and collection runs in a local SQLite database at `data/measurements.sqlite3`.
+- Runs a scheduled collection cycle (default every 15 minutes) and also offers a manual collection action.
+- Measures a representative IPv4 address per discovered prefix, up to a configurable maximum each cycle.
+- Shows historical measurements and a preliminary ranking based on observed packet loss, latency, and sample count.
+- Retains the existing ping and traceroute diagnostic endpoints and the native systemd service.
 
-## Requirements
+## Important measurement limits
 
-- Debian 13 (Trixie) or a compatible Debian release.
-- Root/sudo access for the installer to install system packages and register the service.
-- Network access to install Python packages.
-- A network policy that permits the required ICMP/UDP probes.
+This tool discovers prefixes announced by an ASN; that does not mean every address in a prefix is assigned, reachable, or equivalent in performance. It deliberately does **not** scan every address in a prefix. Each cycle measures one deterministic representative address per selected prefix, so rankings are preliminary and depend on whether that sample responds to ICMP. A failed/no-response ping is not proof that the address is unused or that the prefix is poor: routers and hosts can filter ICMP. Collect data over multiple days and use other permitted protocols or provider-approved targets before making operational decisions.
+
+RIPEstat is a public routing-data source, not an Algeria Telecom internal inventory. Prefixes can change, and public routing datasets can be incomplete or delayed. Configure only ASNs you have a reason to compare. Use the measurements responsibly and do not conduct broad port scans or unauthorized probing.
 
 ## Install with one command
 
-Review `install.sh` before running it, then execute from the cloned repository:
-
-```bash
-sudo bash install.sh
-```
-
-The installer installs system dependencies, creates a Python virtual environment, installs requirements, writes a local `.env` if absent, registers and starts the `dz-route-analyzer` systemd service.
-
-To clone and install on a fresh Debian LXC:
+For an existing Debian LXC or Debian host, review the script first and then run it from a clone:
 
 ```bash
 sudo apt update && sudo apt install -y git
@@ -36,61 +29,33 @@ cd dz-route-analyzer
 sudo bash install.sh
 ```
 
-## Create a fresh Proxmox LXC and install automatically
+The installer installs system packages, creates a Python virtual environment and a local `.env` file if one does not exist, registers the systemd service, and starts the dashboard.
 
-Run the following script **on the Proxmox VE host as root**. It creates a new unprivileged Debian 13 LXC, configures a static IPv4 address, installs Git and the application, and enables the systemd service. It does not install Docker.
+## Create a new Proxmox LXC
 
-Review `proxmox-install.sh` before running it. Download and execute it on the Proxmox host:
-
-```bash
-apt-get update
-apt-get install -y curl
-curl -fsSLo proxmox-install.sh https://raw.githubusercontent.com/ABCWeb3/dz-route-analyzer/main/proxmox-install.sh
-less proxmox-install.sh
-bash proxmox-install.sh
-```
-
-The script interactively asks for the CT ID, hostname, static IPv4 address **with CIDR** (for example `192.168.1.113/24`), gateway, bridge, storage, CPU, RAM, disk size, and DNS server. It shows a summary and requires typing `YES` before creating the container. Use an unused IP address and reserve it or exclude it from the DHCP pool.
-
-Defaults are CT ID `213`, bridge `vmbr0`, rootfs storage `local-lvm`, template storage `local`, 2 CPU cores, 1024 MiB RAM, 512 MiB swap, 8 GiB disk, and DNS `1.1.1.1`. Change these at the prompts to match your Proxmox node.
-
-After installation, open `http://<STATIC-IP>:8088`. If a step fails, the script deliberately leaves the new container in place for troubleshooting rather than deleting it automatically. Check the service with:
+Run on the Proxmox VE host as root. This creates a **new** unprivileged Debian 13 LXC; it does not replace or modify an existing container:
 
 ```bash
-pct exec <CTID> -- systemctl status dz-route-analyzer
-pct exec <CTID> -- journalctl -u dz-route-analyzer -n 100 --no-pager
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/ABCWeb3/dz-route-analyzer/main/proxmox-install.sh)"
 ```
 
-The script creates a standard unprivileged container; it does not enable privileged mode or weaken the host's LXC security settings. ICMP Ping/Traceroute behavior can still depend on the Proxmox host's kernel and container security policy.
+The interactive installer asks for container ID, hostname, static IPv4/CIDR, gateway, bridge, storage, CPU, memory, disk, and DNS. Use an unused static address and reserve it or exclude it from DHCP. Review `proxmox-install.sh` before execution if you need to audit its actions.
 
-## Open the dashboard
-
-By default, the dashboard listens on port `8088`. Open:
-
-```text
-http://<LXC-IP>:8088
-```
-
-For example, if the container address is `192.168.1.113`, use `http://192.168.1.113:8088`.
-
-## Service commands
-
-```bash
-sudo systemctl status dz-route-analyzer
-sudo journalctl -u dz-route-analyzer -f
-sudo systemctl restart dz-route-analyzer
-sudo systemctl stop dz-route-analyzer
-```
+Open `http://<LXC-IP>:8088` after installation.
 
 ## Configuration
 
-The installer creates `.env` from `.env.example` only if it does not already exist.
+The installer creates `.env` from `.env.example` only if it does not already exist. Existing local settings are preserved during a normal reinstall.
 
-- `WEB_HOST`: bind address (default `0.0.0.0`)
-- `WEB_PORT`: web port (default `8088`)
-- `PING_COUNT`: ping packets per test (default `10`)
-- `AUTO_TEST_INTERVAL_MINUTES`: reserved for scheduled testing (default `15`)
-- `TZ`: time zone (default `Africa/Algiers`)
+| Variable | Default | Purpose |
+|---|---|---|
+| `WEB_HOST` | `0.0.0.0` | Dashboard bind address |
+| `WEB_PORT` | `8088` | Dashboard port |
+| `AUTO_TEST_INTERVAL_MINUTES` | `15` | Time between scheduled collection cycles (minimum 5) |
+| `PING_COUNT` | `5` | ICMP packets per target measurement |
+| `TARGET_ASNS` | `AS33779` | Comma-separated ASNs to discover |
+| `MAX_PREFIXES_PER_CYCLE` | `20` | Maximum prefixes sampled each cycle |
+| `TZ` | `Africa/Algiers` | Host/container timezone setting |
 
 After changing configuration, restart the service:
 
@@ -98,32 +63,56 @@ After changing configuration, restart the service:
 sudo systemctl restart dz-route-analyzer
 ```
 
-## API
+## Dashboard and API
 
-- `GET /api/status` — service and configuration status.
-- `GET /api/ping?host=1.1.1.1` — run a ping test against a host.
-- `GET /api/traceroute?host=1.1.1.1` — run a bounded traceroute.
+- `GET /` — historical dashboard and preliminary prefix ranking.
+- `GET /api/status` — service configuration and collection summary.
+- `GET /api/collect` — manually trigger one discovery/measurement cycle.
+- `GET /api/prefixes` — active prefixes and aggregated historical metrics.
+- `GET /api/history?limit=100` — recent measurements; optionally add `prefix=203.0.113.0/24`.
+- `GET /api/runs?limit=20` — collection run history.
+- `GET /api/ping?host=1.1.1.1` — manual ping diagnostic.
+- `GET /api/traceroute?host=1.1.1.1` — bounded traceroute diagnostic.
 
-Only use the tool against systems and networks you are authorized to test. Host input is validated and command execution uses argument arrays rather than a shell.
+The API runs on the local network by default. Do not expose it directly to the public internet without adding authentication and access controls.
 
-## Troubleshooting
+## Service commands
 
-- If the page does not load, check `systemctl status dz-route-analyzer`, `journalctl -u dz-route-analyzer -n 100`, the configured port, and the LXC firewall.
-- If a probe returns an execution error, do not interpret it as measured packet loss.
-- Some routers do not respond to traceroute probes; `*` hops do not necessarily mean the destination is unreachable.
-- If the service cannot create ICMP sockets, verify the LXC's security policy and the systemd capability configuration rather than enabling privileged containers.
+```bash
+sudo systemctl status dz-route-analyzer
+sudo journalctl -u dz-route-analyzer -f
+sudo systemctl restart dz-route-analyzer
+```
+
+On the Proxmox host, for CTID 213:
+
+```bash
+pct exec 213 -- systemctl status dz-route-analyzer
+pct exec 213 -- journalctl -u dz-route-analyzer -n 100 --no-pager
+```
+
+## Updating an existing installation
+
+Back up the local database and configuration before updating. The GitHub repository is the source of truth for application code, while `.env` and `data/measurements.sqlite3` are local state and should be retained.
+
+```bash
+cd /opt/dz-route-analyzer
+sudo cp -a .env data "/root/dz-route-analyzer-backup-$(date +%F)"
+sudo git pull --ff-only
+sudo bash install.sh
+sudo systemctl restart dz-route-analyzer
+sudo systemctl status dz-route-analyzer --no-pager
+```
+
+If the repository was cloned to a different path, substitute that path for `/opt/dz-route-analyzer`.
 
 ## Project structure
 
 ```text
-app/main.py                 FastAPI application and dashboard
+app/main.py                 FastAPI dashboard, discovery, SQLite, and probes
 requirements.txt            Python dependencies
 .env.example                Example configuration
-install.sh                  One-command Debian installer
-proxmox-install.sh          Proxmox host script to create and install a Debian LXC
+install.sh                  Native Debian installer
+proxmox-install.sh          Proxmox LXC installer
 dz-route-analyzer.service   systemd unit template
 ```
-
-## License
-
-See [LICENSE](LICENSE) if a license file is added to this repository.
