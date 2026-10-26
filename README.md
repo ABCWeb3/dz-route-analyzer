@@ -5,7 +5,7 @@ A lightweight native Debian 13 / Proxmox LXC dashboard for discovering IPv4 pref
 ## What it does
 
 - Discovers IPv4 prefixes announced in public routing data via RIPEstat.
-- Defaults to `AS33779` as the Algeria Telecom ASN; verify the ASN against current official/provider routing data before drawing conclusions.
+- Defaults to `AS36947` (Telecom Algeria / Algérie Télécom); verify the ASN against current routing data before drawing conclusions. `AS33779` belongs to Wataniya Telecom / Ooredoo Algeria, not Algérie Télécom.
 - Stores discovered prefixes, individual measurements, and collection runs in a local SQLite database at `data/measurements.sqlite3`.
 - Runs a scheduled collection cycle (default every 15 minutes) and also offers a manual collection action.
 - Measures a representative IPv4 address per discovered prefix, up to a configurable maximum each cycle.
