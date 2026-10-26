@@ -24,7 +24,7 @@ WEB_HOST = os.getenv("WEB_HOST", "0.0.0.0")
 WEB_PORT = int(os.getenv("WEB_PORT", "8088"))
 PING_COUNT = max(1, min(int(os.getenv("PING_COUNT", "5")), 20))
 AUTO_TEST_INTERVAL_MINUTES = max(5, int(os.getenv("AUTO_TEST_INTERVAL_MINUTES", "15")))
-ASN_LIST = [x.strip().upper() for x in os.getenv("TARGET_ASNS", "AS33779").split(",") if x.strip()]
+ASN_LIST = [x.strip().upper() for x in os.getenv("TARGET_ASNS", "AS36947").split(",") if x.strip()]
 MAX_PREFIXES = max(1, min(int(os.getenv("MAX_PREFIXES_PER_CYCLE", "20")), 100))
 DB_PATH = os.getenv("DB_PATH", os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "measurements.sqlite3"))
 HOST_RE = re.compile(r"^(?=.{1,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)(?:\.(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?))*\.?$")
