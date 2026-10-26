@@ -34,10 +34,13 @@ python3 -m venv "${APP_DIR}/.venv"
 "${APP_DIR}/.venv/bin/pip" install -r "${APP_DIR}/requirements.txt"
 
 chown -R "${APP_NAME}:${APP_NAME}" "${APP_DIR}/.venv" "${APP_DIR}/data"
+chown root:"${APP_NAME}" "${APP_DIR}"
 chmod 0750 "${APP_DIR}"
 chmod 0640 "${APP_DIR}/.env"
 
-install -m 0644 "${APP_DIR}/dz-route-analyzer.service" "${SERVICE_FILE}"
+# Render the unit with the actual clone directory, rather than assuming /opt.
+sed "s|/opt/dz-route-analyzer|${APP_DIR}|g" "${APP_DIR}/dz-route-analyzer.service" > "${SERVICE_FILE}"
+chmod 0644 "${SERVICE_FILE}"
 systemctl daemon-reload
 systemctl enable --now "${APP_NAME}.service"
 
