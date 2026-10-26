@@ -187,40 +187,95 @@ app = FastAPI(title=APP_NAME, version="2.0.0", lifespan=lifespan)
 def dashboard() -> str:
     return """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DZ Route Analyzer</title><style>
-:root{color-scheme:dark;font-family:system-ui,sans-serif}body{margin:0;background:#0b1220;color:#e5e7eb}
-main{max-width:1150px;margin:30px auto;padding:0 18px}h1{margin-bottom:4px}.muted{color:#9ca3af}
-.card{background:#111c2f;border:1px solid #263449;border-radius:14px;padding:18px;margin:16px 0;overflow:auto}
-button{font:inherit;border-radius:8px;padding:10px 13px;border:1px solid #34445c;background:#2563eb;color:white;cursor:pointer;margin:4px}
-table{border-collapse:collapse;width:100%;font-size:.92rem}th,td{text-align:left;padding:10px;border-bottom:1px solid #263449;white-space:nowrap}
-.metric{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}.metric div{background:#0b1220;padding:14px;border-radius:10px}
-.metric b{font-size:1.4rem;display:block;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#080d16;padding:14px;border-radius:8px}
-</style></head><body><main><h1>🇩🇿 DZ Route Analyzer</h1>
-<p class="muted">Track your connection's observed public IPv4 address and measure latency/loss over time.</p>
-<section class="card"><h2>Current connection observation</h2><div class="metric" id="metrics"><div>Loading…</div></div>
-<button onclick="collect()">Collect now</button><button onclick="refreshAll()">Refresh history</button>
-<p class="muted" id="message">Automatic collection every configured interval.</p></section>
-<section class="card"><h2>Performance by observed IP group</h2>
-<p class="muted">Groups such as 41.x.x.x are based on the first IPv4 octet. The /24 label is only a convenient grouping, not a claim about the ISP's routed prefix. Prefer groups with repeated samples; routing and congestion can change.</p>
-<table><thead><tr><th>IP group</th><th>Samples</th><th>Distinct IPs</th><th>Avg latency</th><th>Avg packet loss</th><th>Last seen</th></tr></thead><tbody id="groups"><tr><td colspan="6">Loading…</td></tr></tbody></table></section>
-<section class="card"><h2>Observed public IP history</h2><table><thead><tr><th>Time (UTC)</th><th>Public IP</th><th>Group</th><th>Approx. /24</th><th>Targets measured</th></tr></thead><tbody id="history"><tr><td colspan="5">Loading…</td></tr></tbody></table></section>
-<section class="card"><h2>Recent probe results</h2><table><thead><tr><th>Time (UTC)</th><th>Public IP</th><th>Target</th><th>Latency</th><th>Loss</th><th>Jitter</th><th>Status</th></tr></thead><tbody id="probes"><tr><td colspan="7">Loading…</td></tr></tbody></table></section>
-<section class="card"><h2>Service status</h2><pre id="status">Loading…</pre></section>
+<meta name="theme-color" content="#0b1020"><title>DZ Route Analyzer</title>
+<style>
+:root{color-scheme:dark;--bg:#090e1b;--panel:#111a2c;--panel2:#0d1526;--line:#24324a;--text:#edf3ff;--muted:#8fa1bb;--blue:#7aa7ff;--cyan:#62d8e8;--green:#6ee7b7;--amber:#f7c66b;--red:#fb8791;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% -10%,#18305a 0,transparent 38%),var(--bg);color:var(--text);min-height:100vh}
+main{max-width:1380px;margin:auto;padding:28px 24px 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:25px}
+.brand{display:flex;align-items:center;gap:13px}.logo{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,#2463eb,#22b8cf);font-size:25px;box-shadow:0 8px 25px #2463eb35}
+h1{font-size:clamp(22px,3vw,31px);letter-spacing:-.7px;margin:0}.subtitle{color:var(--muted);font-size:13px;margin-top:5px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}button{font:inherit;font-size:13px;font-weight:650;border:1px solid var(--line);background:#17243a;color:var(--text);padding:11px 15px;border-radius:11px;cursor:pointer;transition:.18s}
+button:hover{border-color:#5d8de5;transform:translateY(-1px)}button.primary{background:linear-gradient(135deg,#3978f6,#2860d8);border-color:#4a83f7}button:disabled{opacity:.6;cursor:wait;transform:none}
+.statusline{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;margin:0 0 18px}.dot{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 12px #6ee7b766}.dot.busy{background:var(--amber);box-shadow:0 0 12px #f7c66b66}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.panel{background:linear-gradient(145deg,#131e32f5,#0e1728f5);border:1px solid var(--line);border-radius:18px;padding:20px;min-width:0;box-shadow:0 12px 35px #00000012}
+.span12{grid-column:span 12}.span8{grid-column:span 8}.span7{grid-column:span 7}.span6{grid-column:span 6}.span5{grid-column:span 5}.span4{grid-column:span 4}
+.panelhead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}.panel h2{font-size:15px;margin:0;font-weight:750;letter-spacing:.1px}.hint{font-size:12px;color:var(--muted);line-height:1.55;margin:6px 0 0}.eyebrow{text-transform:uppercase;letter-spacing:1.4px;font-size:10px;color:var(--muted);font-weight:800}
+.iphero{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}.ipvalue{font-size:clamp(28px,4vw,43px);font-weight:800;letter-spacing:-1.5px;margin:8px 0 4px;overflow-wrap:anywhere}.groupbadge{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;background:#203657;border:1px solid #345582;border-radius:9px;color:#b8d4ff;font-size:12px;font-weight:750}
+.bigstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}.stat{padding:14px;background:#0b1323;border:1px solid #1d2a40;border-radius:13px;min-width:0}.stat label{font-size:11px;color:var(--muted);display:block;margin-bottom:9px}.stat strong{font-size:20px;display:block;letter-spacing:-.4px;overflow-wrap:anywhere}.stat small{font-size:11px;color:var(--muted);display:block;margin-top:5px}
+.pill{font-size:10px;font-weight:800;padding:5px 8px;border-radius:7px;background:#142f2b;color:var(--green);white-space:nowrap}.pill.warn{background:#3a2c16;color:var(--amber)}.pill.error{background:#3b1c29;color:var(--red)}
+.chartwrap{height:215px;position:relative}.chartwrap svg{width:100%;height:100%;overflow:visible}.chartlegend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:8px}.legenddot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:12px}th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:#8295b1;font-weight:800;padding:11px 12px;border-bottom:1px solid var(--line)}td{padding:13px 12px;border-bottom:1px solid #202c40;color:#dbe6f8}tbody tr:hover{background:#ffffff05}tbody tr:last-child td{border-bottom:0}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.good{color:var(--green)}.bad{color:var(--red)}.empty{text-align:center;padding:25px;color:var(--muted)}
+.barcell{min-width:120px}.barbg{height:5px;border-radius:9px;background:#24324a;overflow:hidden;margin-top:7px}.barfill{height:100%;border-radius:9px;background:linear-gradient(90deg,#5d9cff,#60d8e7)}
+.targetlist{display:grid;gap:11px}.target{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;background:#0b1323;border:1px solid #202e45;border-radius:12px}.targetname{font-size:13px;font-weight:750}.targetsub{font-size:11px;color:var(--muted);margin-top:4px}.targetmetrics{text-align:right}.targetmetrics strong{font-size:15px;display:block}.targetmetrics small{color:var(--muted);font-size:11px}
+.footnote{color:var(--muted);font-size:11px;line-height:1.65;margin-top:16px}.notice{border:1px solid #3b4a65;background:#121f34;padding:13px 15px;border-radius:12px;color:#b8c8df;font-size:12px;line-height:1.6;margin-top:16px}
+@media(max-width:900px){.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.bigstats{grid-template-columns:repeat(2,minmax(0,1fr))}.top{align-items:flex-start;flex-direction:column}.actions{width:100%}}
+@media(max-width:480px){main{padding:18px 12px 35px}.panel{padding:15px;border-radius:15px}.bigstats{gap:8px}.stat{padding:11px}.stat strong{font-size:17px}.ipvalue{font-size:30px}.actions button{flex:1}}
+</style></head><body><main>
+<header class="top"><div class="brand"><div class="logo">⌁</div><div><h1>DZ Route Analyzer</h1><div class="subtitle">Internet connection intelligence · Algérie Télécom</div></div></div>
+<div class="actions"><button onclick="refreshAll()">↻ Refresh</button><button class="primary" id="collectBtn" onclick="collect()">▶ Collect now</button></div></header>
+<div class="statusline"><span id="statusDot" class="dot"></span><span id="statusText">Connecting to collector…</span><span id="updated" style="margin-left:auto"></span></div>
+<div class="grid">
+<section class="panel span12"><div class="iphero"><div><div class="eyebrow">Current observed public IPv4</div><div class="ipvalue mono" id="currentIP">—</div><div id="currentGroup" class="groupbadge">◉ Waiting for first observation</div></div><div><div class="eyebrow">Last observation</div><div id="currentTime" style="font-size:14px;font-weight:700;margin-top:9px">—</div><div class="hint" id="changeText">Changes are recorded automatically</div></div></div>
+<div class="bigstats"><div class="stat"><label>Recorded observations</label><strong id="observations">—</strong><small>Historical samples</small></div><div class="stat"><label>IP changes</label><strong id="changes">—</strong><small>Detected between samples</small></div><div class="stat"><label>Average latency</label><strong id="avgLatency">—</strong><small>Latest collection cycle</small></div><div class="stat"><label>Average packet loss</label><strong id="avgLoss">—</strong><small>Latest collection cycle</small></div></div></section>
+<section class="panel span7"><div class="panelhead"><div><h2>Latency timeline</h2><p class="hint">Response time to monitored targets over recent observations</p></div><span class="pill" id="sampleBadge">0 samples</span></div><div class="chartwrap" id="chart"><div class="empty">Collecting measurements…</div></div><div class="chartlegend"><span><i class="legenddot" style="background:#7aa7ff"></i>1.1.1.1</span><span><i class="legenddot" style="background:#62d8e8"></i>8.8.8.8</span></div></section>
+<section class="panel span5"><div class="panelhead"><div><h2>Latest target health</h2><p class="hint">Latency and packet loss for the latest sample</p></div></div><div class="targetlist" id="targetList"><div class="empty">No measurements yet</div></div><div class="footnote">A target may ignore ICMP. Compare both targets and look at repeated results rather than one sample.</div></section>
+<section class="panel span12"><div class="panelhead"><div><h2>Performance by IP group</h2><p class="hint">Compare observed groups using repeated measurements. Lower latency and packet loss are generally preferable.</p></div></div><div class="tablewrap"><table><thead><tr><th>IP group</th><th>Samples</th><th>Distinct IPs</th><th>Average latency</th><th>Average loss</th><th>Last observed</th></tr></thead><tbody id="groups"><tr><td colspan="6" class="empty">Loading group data…</td></tr></tbody></table></div></section>
+<section class="panel span12"><div class="panelhead"><div><h2>Public IP history</h2><p class="hint">Each row is one collection cycle. Times are displayed in your browser's local timezone.</p></div><span class="pill" id="historyBadge">Recent records</span></div><div class="tablewrap"><table><thead><tr><th>Observed at</th><th>Public IP</th><th>Group</th><th>Approx. /24</th><th>Targets tested</th></tr></thead><tbody id="history"><tr><td colspan="5" class="empty">Loading history…</td></tr></tbody></table></div></section>
+<section class="panel span12"><div class="panelhead"><div><h2>Probe details</h2><p class="hint">Latest ping results, including failures and packet loss</p></div></div><div class="tablewrap"><table><thead><tr><th>Time</th><th>Public IP</th><th>Target</th><th>Average</th><th>Min / Max</th><th>Loss</th><th>Jitter</th><th>Result</th></tr></thead><tbody id="probes"><tr><td colspan="8" class="empty">Loading probe details…</td></tr></tbody></table></div>
+<div class="notice">Interpretation note: the displayed address is the public IPv4 seen by an external check service. If Algérie Télécom uses CGNAT, this can differ from the address assigned to the OPNsense WAN interface. The approximate /24 is a display grouping, not confirmation of the ISP's actual routed prefix.</div></section>
+</div><p class="footnote">DZ Route Analyzer · Local SQLite history · Automatic collection every <span id="interval">15</span> minutes · Data is retained on this server.</p>
 <script>
 async function get(path){const r=await fetch(path);const d=await r.json();if(!r.ok)throw Error(d.detail||'Request failed');return d}
 function esc(v){return String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function ms(v){return v==null?'—':Number(v).toFixed(2)+' ms'}
-function pct(v){return v==null?'—':Number(v).toFixed(1)+'%'}
-async function refreshAll(){try{
-const [s,g,h,p]=await Promise.all([get('/api/status'),get('/api/groups'),get('/api/history?limit=80'),get('/api/probes?limit=100')]);
-const c=s.current||{};
-document.querySelector('#metrics').innerHTML=[['Observed public IP',c.public_ip],['IP group',c.ip_group],['Approx. /24',c.prefix24],['Last observation',c.observed_at],['IP changes recorded',s.ip_changes],['Collection interval',s.interval_minutes+' min']].map(x=>'<div><span class="muted">'+esc(x[0])+'</span><b>'+esc(x[1])+'</b></div>').join('');
-document.querySelector('#groups').innerHTML=g.items.map(x=>'<tr><td>'+esc(x.ip_group)+'</td><td>'+esc(x.samples)+'</td><td>'+esc(x.distinct_ips)+'</td><td>'+ms(x.avg_ms)+'</td><td>'+pct(x.avg_loss_pct)+'</td><td>'+esc(x.last_seen)+'</td></tr>').join('')||'<tr><td colspan="6">No observations yet.</td></tr>';
-document.querySelector('#history').innerHTML=h.items.map(x=>'<tr><td>'+esc(x.observed_at)+'</td><td>'+esc(x.public_ip)+'</td><td>'+esc(x.ip_group)+'</td><td>'+esc(x.prefix24)+'</td><td>'+esc(x.probe_count)+'</td></tr>').join('')||'<tr><td colspan="5">No history yet.</td></tr>';
-document.querySelector('#probes').innerHTML=p.items.map(x=>'<tr><td>'+esc(x.tested_at)+'</td><td>'+esc(x.public_ip)+'</td><td>'+esc(x.target)+'</td><td>'+ms(x.avg_ms)+'</td><td>'+pct(x.loss_pct)+'</td><td>'+ms(x.jitter_ms)+'</td><td>'+esc(x.ok?'OK':'Incomplete')+'</td></tr>').join('')||'<tr><td colspan="7">No probe results yet.</td></tr>';
-document.querySelector('#status').textContent=JSON.stringify(s,null,2);
-}catch(e){document.querySelector('#message').textContent=String(e)}}
-async function collect(){const m=document.querySelector('#message');m.textContent='Checking public IP and measuring fixed targets…';try{const d=await get('/api/collect');m.textContent=JSON.stringify(d);await refreshAll()}catch(e){m.textContent=String(e)}}
+function n(v,d=1){return v==null?'—':Number(v).toFixed(d)}
+function ms(v){return v==null?'—':n(v,2)+' ms'}
+function pct(v){return v==null?'—':n(v,1)+'%'}
+function date(v){if(!v)return '—';const d=new Date(v);return isNaN(d)?esc(v):d.toLocaleString([], {month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
+function fullDate(v){if(!v)return '—';const d=new Date(v);return isNaN(d)?esc(v):d.toLocaleString()}
+function cell(v,cls){return '<td'+(cls?' class="'+cls+'"':'')+'>'+esc(v)+'</td>'}
+function renderChart(items){
+ const el=document.querySelector('#chart');const ordered=items.slice().reverse();const valid=ordered.filter(x=>x.avg_ms!=null);
+ document.querySelector('#sampleBadge').textContent=valid.length+' measurements';
+ if(!valid.length){el.innerHTML='<div class="empty">Latency chart will appear after the first successful ping.</div>';return}
+ const W=700,H=205,L=44,R=12,T=14,B=29,plotW=W-L-R,plotH=H-T-B;
+ const max=Math.max(10,...valid.map(x=>Number(x.avg_ms)||0))*1.15;
+ const grid=[0,.25,.5,.75,1].map(q=>{const y=T+plotH*q;return '<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'" stroke="#26354c" stroke-dasharray="3 5"/><text x="'+(L-8)+'" y="'+(y+4)+'" fill="#8092ad" font-size="10" text-anchor="end">'+n(max*(1-q),0)+'</text>'}).join('');
+ const line=(target,color)=>{const vals=ordered.map((o,i)=>{const p=(o.probes||[]).find(z=>z.target===target&&z.avg_ms!=null);return p?{i,v:Number(p.avg_ms)}:null}).filter(Boolean);if(!vals.length)return '';const pts=vals.map(p=>(L+(ordered.length<2?plotW/2:p.i/(ordered.length-1)*plotW))+','+(T+plotH-(p.v/max*plotH))).join(' ');return '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'+vals.map(p=>'<circle cx="'+(L+(ordered.length<2?plotW/2:p.i/(ordered.length-1)*plotW))+'" cy="'+(T+plotH-p.v/max*plotH)+'" r="3" fill="'+color+'" stroke="#111a2c" stroke-width="1.5"/>').join('')};
+ const labels=ordered.length?'<text x="'+L+'" y="'+(H-7)+'" fill="#8092ad" font-size="10">'+esc(date(ordered[0].observed_at))+'</text><text x="'+(W-R)+'" y="'+(H-7)+'" fill="#8092ad" font-size="10" text-anchor="end">'+esc(date(ordered[ordered.length-1].observed_at))+'</text>':'';
+ el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Latency history chart">'+grid+line('1.1.1.1','#7aa7ff')+line('8.8.8.8','#62d8e8')+labels+'</svg>';
+}
+async function refreshAll(){
+ try{
+ const [s,g,h,p]=await Promise.all([get('/api/status'),get('/api/groups'),get('/api/history?limit=60'),get('/api/probes?limit=120')]);
+ const c=s.current||{},latest=h.items[0],latestProbes=p.items.filter(x=>latest&&x.observation_id===latest.id);
+ document.querySelector('#currentIP').textContent=c.public_ip||'Waiting for first sample';
+ document.querySelector('#currentGroup').textContent=c.ip_group?'◉ '+c.ip_group:'◉ No IP observed yet';
+ document.querySelector('#currentTime').textContent=fullDate(c.observed_at);
+ document.querySelector('#changeText').textContent=(s.ip_changes||0)+' observed address changes since monitoring began';
+ document.querySelector('#observations').textContent=s.observations??0;
+ document.querySelector('#changes').textContent=s.ip_changes??0;
+ const good=latestProbes.filter(x=>x.avg_ms!=null),avg=good.length?good.reduce((a,x)=>a+Number(x.avg_ms),0)/good.length:null;
+ const loss=latestProbes.filter(x=>x.loss_pct!=null),lossAvg=loss.length?loss.reduce((a,x)=>a+Number(x.loss_pct),0)/loss.length:null;
+ document.querySelector('#avgLatency').textContent=ms(avg);document.querySelector('#avgLoss').textContent=pct(lossAvg);
+ document.querySelector('#interval').textContent=s.interval_minutes||15;
+ document.querySelector('#statusText').textContent=s.last_run&&s.last_run.status==='failed'?'Collector needs attention':'Collector connected · automatic monitoring enabled';
+ document.querySelector('#statusDot').className='dot'+(s.last_run&&s.last_run.status==='failed'?' busy':'');
+ document.querySelector('#updated').textContent='Updated '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+ document.querySelector('#targetList').innerHTML=latestProbes.map(x=>'<div class="target"><div><div class="targetname mono">'+esc(x.target)+'</div><div class="targetsub">'+(x.ok?'<span class="good">● Reachable</span>':'<span class="bad">● Incomplete</span>')+'</div></div><div class="targetmetrics"><strong>'+ms(x.avg_ms)+'</strong><small>Loss '+pct(x.loss_pct)+'</small></div></div>').join('')||'<div class="empty">No results for the latest sample yet.</div>';
+ document.querySelector('#groups').innerHTML=g.items.map(x=>'<tr>'+cell(x.ip_group,'mono')+cell(x.samples)+cell(x.distinct_ips)+'<td class="barcell">'+ms(x.avg_ms)+'<div class="barbg"><div class="barfill" style="width:'+Math.max(0,Math.min(100,100-(Number(x.avg_ms)||0)*2))+'%"></div></div></td>'+cell(pct(x.avg_loss_pct),Number(x.avg_loss_pct)>0?'bad':'good')+cell(date(x.last_seen))+'</tr>').join('')||'<tr><td colspan="6" class="empty">No groups recorded yet. Start a collection to begin.</td></tr>';
+ document.querySelector('#historyBadge').textContent=h.items.length+' recent records';
+ document.querySelector('#history').innerHTML=h.items.map(x=>'<tr>'+cell(date(x.observed_at))+cell(x.public_ip,'mono')+cell(x.ip_group,'mono')+cell(x.prefix24,'mono')+cell(x.probe_count)+'</tr>').join('')||'<tr><td colspan="5" class="empty">No history yet.</td></tr>';
+ document.querySelector('#probes').innerHTML=p.items.map(x=>'<tr>'+cell(date(x.tested_at))+cell(x.public_ip,'mono')+cell(x.target,'mono')+cell(ms(x.avg_ms))+cell((x.min_ms==null?'—':n(x.min_ms,2))+' / '+(x.max_ms==null?'—':n(x.max_ms,2))+' ms')+cell(pct(x.loss_pct),Number(x.loss_pct)>0?'bad':'good')+cell(ms(x.jitter_ms))+cell(x.ok?'OK':'Incomplete',x.ok?'good':'bad')+'</tr>').join('')||'<tr><td colspan="8" class="empty">No probe details yet.</td></tr>';
+ renderChart(h.items.map(o=>({...o,probes:p.items.filter(x=>x.observation_id===o.id)})));
+ }catch(e){document.querySelector('#statusText').textContent='Could not load dashboard data';document.querySelector('#statusDot').className='dot busy';console.error(e)}
+}
+async function collect(){
+ const b=document.querySelector('#collectBtn'),t=document.querySelector('#statusText');
+ b.disabled=true;b.textContent='Collecting…';t.textContent='Checking public IP and pinging targets…';document.querySelector('#statusDot').className='dot busy';
+ try{const d=await get('/api/collect');if(!d.ok&&d.message){t.textContent=d.message}else if(!d.ok){t.textContent='Collection failed: '+(d.error||'unknown error')}else{t.textContent='Collection completed for '+d.public_ip}await refreshAll()}
+ catch(e){t.textContent='Collection failed: '+e.message}
+ finally{b.disabled=false;b.textContent='▶ Collect now';document.querySelector('#statusDot').className='dot'}
+}
 refreshAll();setInterval(refreshAll,60000);
 </script></main></body></html>"""
 
