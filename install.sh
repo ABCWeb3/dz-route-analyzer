@@ -54,7 +54,7 @@ if [[ ! -f "${APP_DIR}/.env" ]]; then
 fi
 
 run_step 52 "Creating Python virtual environment" python3 -m venv "${APP_DIR}/.venv"
-"${APP_DIR}/.venv/bin/python" -m pip install --upgrade pip
+run_step 60 "Updating pip package manager" "${APP_DIR}/.venv/bin/python" -m pip install --upgrade pip
 run_step 68 "Installing Python dependencies" "${APP_DIR}/.venv/bin/pip" install -r "${APP_DIR}/requirements.txt"
 
 chown -R "${APP_NAME}:${APP_NAME}" "${APP_DIR}/.venv" "${APP_DIR}/data"
