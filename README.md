@@ -36,6 +36,33 @@ cd dz-route-analyzer
 sudo bash install.sh
 ```
 
+## Create a fresh Proxmox LXC and install automatically
+
+Run the following script **on the Proxmox VE host as root**. It creates a new unprivileged Debian 13 LXC, configures a static IPv4 address, installs Git and the application, and enables the systemd service. It does not install Docker.
+
+Review `proxmox-install.sh` before running it. Download and execute it on the Proxmox host:
+
+```bash
+apt-get update
+apt-get install -y curl
+curl -fsSLo proxmox-install.sh https://raw.githubusercontent.com/ABCWeb3/dz-route-analyzer/main/proxmox-install.sh
+less proxmox-install.sh
+bash proxmox-install.sh
+```
+
+The script interactively asks for the CT ID, hostname, static IPv4 address **with CIDR** (for example `192.168.1.113/24`), gateway, bridge, storage, CPU, RAM, disk size, and DNS server. It shows a summary and requires typing `YES` before creating the container. Use an unused IP address and reserve it or exclude it from the DHCP pool.
+
+Defaults are CT ID `213`, bridge `vmbr0`, rootfs storage `local-lvm`, template storage `local`, 2 CPU cores, 1024 MiB RAM, 512 MiB swap, 8 GiB disk, and DNS `1.1.1.1`. Change these at the prompts to match your Proxmox node.
+
+After installation, open `http://<STATIC-IP>:8088`. If a step fails, the script deliberately leaves the new container in place for troubleshooting rather than deleting it automatically. Check the service with:
+
+```bash
+pct exec <CTID> -- systemctl status dz-route-analyzer
+pct exec <CTID> -- journalctl -u dz-route-analyzer -n 100 --no-pager
+```
+
+The script creates a standard unprivileged container; it does not enable privileged mode or weaken the host's LXC security settings. ICMP Ping/Traceroute behavior can still depend on the Proxmox host's kernel and container security policy.
+
 ## Open the dashboard
 
 By default, the dashboard listens on port `8088`. Open:
@@ -93,6 +120,7 @@ app/main.py                 FastAPI application and dashboard
 requirements.txt            Python dependencies
 .env.example                Example configuration
 install.sh                  One-command Debian installer
+proxmox-install.sh          Proxmox host script to create and install a Debian LXC
 dz-route-analyzer.service   systemd unit template
 ```
 
