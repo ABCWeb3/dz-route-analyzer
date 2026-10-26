@@ -381,7 +381,12 @@ async function refreshAll(){
  document.querySelector('#historyBadge').textContent=h.items.length+' recent records';
  document.querySelector('#history').innerHTML=h.items.map(x=>'<tr>'+cell(date(x.observed_at))+cell(x.public_ip,'mono')+cell(x.ip_group,'mono')+cell(x.prefix24,'mono')+cell(x.probe_count)+'</tr>').join('')||'<tr><td colspan="5" class="empty">No history yet.</td></tr>';
  document.querySelector('#probes').innerHTML=p.items.map(x=>'<tr>'+cell(date(x.tested_at))+cell(x.public_ip,'mono')+cell(x.target,'mono')+cell(ms(x.avg_ms))+cell((x.min_ms==null?'—':n(x.min_ms,2))+' / '+(x.max_ms==null?'—':n(x.max_ms,2))+' ms')+cell(pct(x.loss_pct),Number(x.loss_pct)>0?'bad':'good')+cell(ms(x.jitter_ms))+cell(x.ok?'OK':'Incomplete',x.ok?'good':'bad')+'</tr>').join('')||'<tr><td colspan="8" class="empty">No probe details yet.</td></tr>';
- renderChart(h.items.map(o=>({...o,probes:p.items.filter(x=>x.observation_id===o.id)})));
+ renderChart(h.items.map(o=>{
+  const probes=p.items.filter(x=>x.observation_id===o.id);
+  const values=probes.filter(x=>x.avg_ms!=null).map(x=>Number(x.avg_ms));
+  const avg_ms=values.length?values.reduce((sum,value)=>sum+value,0)/values.length:null;
+  return {...o,avg_ms,probes};
+ }));
  }catch(e){document.querySelector('#statusText').textContent='Could not load dashboard data';document.querySelector('#statusDot').className='dot busy';console.error(e)}
 }
 async function collect(){
