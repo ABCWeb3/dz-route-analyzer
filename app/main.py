@@ -203,30 +203,30 @@ def dashboard() -> str:
 <html lang="en" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b1020"><title>DZ Route Analyzer</title>
 <style>
-:root{color-scheme:light;--bg:#f3f7fc;--panel:#ffffff;--panel2:#f8fbff;--line:#e1e9f4;--text:#172b4d;--muted:#71829c;--blue:#3869e8;--cyan:#18a9bc;--green:#12866a;--amber:#b87912;--red:#d44e62;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 0% 0%,#dceaff 0,transparent 36%),radial-gradient(ellipse at 100% 8%,#d9f7f4 0,transparent 30%),var(--bg);color:var(--text);min-height:100vh}
+:root{color-scheme:dark;--bg:#090e1b;--panel:#111a2c;--panel2:#0d1526;--line:#24324a;--text:#edf3ff;--muted:#8fa1bb;--blue:#7aa7ff;--cyan:#62d8e8;--green:#6ee7b7;--amber:#f7c66b;--red:#fb8791;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% -10%,#18305a 0,transparent 38%),var(--bg);color:var(--text);min-height:100vh}
 main{max-width:1380px;margin:auto;padding:28px 24px 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:25px}
-.brand{display:flex;align-items:center;gap:13px}.logo{display:grid;place-items:center;width:50px;height:50px;border-radius:17px;background:linear-gradient(135deg,#3869e8,#21b8b2);font-size:27px;box-shadow:0 10px 24px #3869e82b;color:white}
+.brand{display:flex;align-items:center;gap:13px}.logo{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,#2463eb,#22b8cf);font-size:25px;box-shadow:0 8px 25px #2463eb35}
 h1{font-size:clamp(22px,3vw,31px);letter-spacing:-.7px;margin:0}.subtitle{color:var(--muted);font-size:13px;margin-top:5px}
-.actions{display:flex;gap:8px;flex-wrap:wrap}button{font:inherit;font-size:13px;font-weight:700;border:1px solid #dce5f1;background:#fff;color:#243958;padding:11px 15px;border-radius:12px;cursor:pointer;transition:.18s;box-shadow:0 3px 8px #1e3a5f08}
-button:hover{border-color:#5d8de5;transform:translateY(-1px)}button.primary{background:linear-gradient(135deg,#3869e8,#5b7df0);border-color:#3869e8;color:white;box-shadow:0 7px 18px #3869e82b}button:disabled{opacity:.6;cursor:wait;transform:none}
+.actions{display:flex;gap:8px;flex-wrap:wrap}button{font:inherit;font-size:13px;font-weight:650;border:1px solid var(--line);background:#17243a;color:var(--text);padding:11px 15px;border-radius:11px;cursor:pointer;transition:.18s}
+button:hover{border-color:#5d8de5;transform:translateY(-1px)}button.primary{background:linear-gradient(135deg,#3978f6,#2860d8);border-color:#4a83f7}button:disabled{opacity:.6;cursor:wait;transform:none}
 .statusline{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;margin:0 0 18px}.dot{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 12px #6ee7b766}.dot.busy{background:var(--amber);box-shadow:0 0 12px #f7c66b66}
-.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.panel{background:linear-gradient(145deg,#ffffff,#fbfdff);border:1px solid #e0e9f4;border-radius:20px;padding:22px;min-width:0;box-shadow:0 12px 32px #243e650a}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.panel{background:linear-gradient(145deg,#131e32f5,#0e1728f5);border:1px solid var(--line);border-radius:18px;padding:20px;min-width:0;box-shadow:0 12px 35px #00000012}
 .span12{grid-column:span 12}.span8{grid-column:span 8}.span7{grid-column:span 7}.span6{grid-column:span 6}.span5{grid-column:span 5}.span4{grid-column:span 4}
 .panelhead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}.panel h2{font-size:15px;margin:0;font-weight:750;letter-spacing:.1px}.hint{font-size:12px;color:var(--muted);line-height:1.55;margin:6px 0 0}.eyebrow{text-transform:uppercase;letter-spacing:1.4px;font-size:10px;color:var(--muted);font-weight:800}
-.iphero{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}.ipvalue{font-size:clamp(28px,4vw,43px);font-weight:800;letter-spacing:-1.5px;margin:8px 0 4px;overflow-wrap:anywhere}.groupbadge{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;background:#eaf1ff;border:1px solid #d5e2ff;border-radius:10px;color:#315bc3;font-size:12px;font-weight:800}
-.bigstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}.stat{padding:15px;background:linear-gradient(145deg,#f8fbff,#f1f6fd);border:1px solid #e6edf7;border-radius:15px;min-width:0}.stat label{font-size:11px;color:var(--muted);display:block;margin-bottom:9px}.stat strong{font-size:20px;display:block;letter-spacing:-.4px;overflow-wrap:anywhere}.stat small{font-size:11px;color:var(--muted);display:block;margin-top:5px}
+.iphero{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}.ipvalue{font-size:clamp(28px,4vw,43px);font-weight:800;letter-spacing:-1.5px;margin:8px 0 4px;overflow-wrap:anywhere}.groupbadge{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;background:#203657;border:1px solid #345582;border-radius:9px;color:#b8d4ff;font-size:12px;font-weight:750}
+.bigstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}.stat{padding:14px;background:#0b1323;border:1px solid #1d2a40;border-radius:13px;min-width:0}.stat label{font-size:11px;color:var(--muted);display:block;margin-bottom:9px}.stat strong{font-size:20px;display:block;letter-spacing:-.4px;overflow-wrap:anywhere}.stat small{font-size:11px;color:var(--muted);display:block;margin-top:5px}
 .pill{font-size:10px;font-weight:800;padding:5px 8px;border-radius:7px;background:#142f2b;color:var(--green);white-space:nowrap}.pill.warn{background:#3a2c16;color:var(--amber)}.pill.error{background:#3b1c29;color:var(--red)}
 .chartwrap{height:215px;position:relative}.chartwrap svg{width:100%;height:100%;overflow:visible}.chartlegend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:8px}.legenddot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px}
 .tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:12px}th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:#8295b1;font-weight:800;padding:11px 12px;border-bottom:1px solid var(--line)}td{padding:13px 12px;border-bottom:1px solid #202c40;color:#dbe6f8}tbody tr:hover{background:#ffffff05}tbody tr:last-child td{border-bottom:0}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.good{color:var(--green)}.bad{color:var(--red)}.empty{text-align:center;padding:25px;color:var(--muted)}
-.barcell{min-width:120px}.barbg{height:5px;border-radius:9px;background:#e3ebf7;overflow:hidden;margin-top:7px}.barfill{height:100%;border-radius:9px;background:linear-gradient(90deg,#5d9cff,#60d8e7)}
-.targetlist{display:grid;gap:11px}.target{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;background:#f8fbff;border:1px solid #e5edf7;border-radius:13px}.targetname{font-size:13px;font-weight:750}.targetsub{font-size:11px;color:var(--muted);margin-top:4px}.targetmetrics{text-align:right}.targetmetrics strong{font-size:15px;display:block}.targetmetrics small{color:var(--muted);font-size:11px}
+.barcell{min-width:120px}.barbg{height:5px;border-radius:9px;background:#24324a;overflow:hidden;margin-top:7px}.barfill{height:100%;border-radius:9px;background:linear-gradient(90deg,#5d9cff,#60d8e7)}
+.targetlist{display:grid;gap:11px}.target{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;background:#0b1323;border:1px solid #202e45;border-radius:12px}.targetname{font-size:13px;font-weight:750}.targetsub{font-size:11px;color:var(--muted);margin-top:4px}.targetmetrics{text-align:right}.targetmetrics strong{font-size:15px;display:block}.targetmetrics small{color:var(--muted);font-size:11px}
 .footnote{color:var(--muted);font-size:11px;line-height:1.65;margin-top:16px}.notice{border:1px solid #3b4a65;background:#121f34;padding:13px 15px;border-radius:12px;color:#b8c8df;font-size:12px;line-height:1.6;margin-top:16px}
 @media(max-width:900px){.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.bigstats{grid-template-columns:repeat(2,minmax(0,1fr))}.top{align-items:flex-start;flex-direction:column}.actions{width:100%}}
 @media(max-width:480px){main{padding:18px 12px 35px}.panel{padding:15px;border-radius:15px}.bigstats{gap:8px}.stat{padding:11px}.stat strong{font-size:17px}.ipvalue{font-size:30px}.actions button{flex:1}}
 </style></head><body><main>
 <header class="top"><div class="brand"><div class="logo">⌁</div><div><h1>DZ Route Analyzer</h1><div class="subtitle">Internet connection intelligence · Algérie Télécom</div></div></div>
-<div class="actions"><select id="languageSelect" aria-label="Language" onchange="setLanguage(this.value)" style="font:inherit;font-size:13px;font-weight:700;border:1px solid #dbe4f0;background:#fff;color:#24324b;padding:10px 12px;border-radius:11px"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ar">🇩🇿 العربية</option></select><button onclick="refreshAll()">↻ Refresh</button><button class="primary" id="collectBtn" onclick="collect()">▶ Collect now</button></div></header>
+<div class="actions"><select id="languageSelect" aria-label="Language" onchange="setLanguage(this.value)" style="font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:#17243a;color:var(--text);padding:10px 12px;border-radius:11px"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ar">🇩🇿 العربية</option></select><button onclick="refreshAll()">↻ Refresh</button><button class="primary" id="collectBtn" onclick="collect()">▶ Collect now</button></div></header>
 <div class="statusline"><span id="statusDot" class="dot"></span><span id="statusText">Connecting to collector…</span><span id="updated" style="margin-left:auto"></span></div>
 <section class="panel" style="margin-bottom:16px;padding:15px 18px"><div style="display:flex;align-items:center;gap:12px"><span id="progressIcon" style="font-size:18px;color:var(--cyan)">◌</span><div style="flex:1;min-width:0"><div id="progressMessage" style="font-size:13px;font-weight:700">جاهز لجمع البيانات</div><div style="height:6px;background:#26354c;border-radius:99px;overflow:hidden;margin-top:9px"><div id="progressBar" style="height:100%;width:0;background:linear-gradient(90deg,#3978f6,#62d8e8);border-radius:99px;transition:width .3s"></div></div></div><strong id="progressPercent" style="font-size:13px;min-width:38px;text-align:right">0%</strong></div></section>
 <div class="grid">
@@ -294,10 +294,11 @@ ar:{
 const originalText=new WeakMap();
 function setLanguage(lang){
  if(!translations[lang])lang='en';
- document.documentElement.lang=lang;document.document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+ document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
  document.body.dir=lang==='ar'?'rtl':'ltr';
  document.querySelectorAll('.top,.brand,.actions,.statusline,.iphero,.panelhead,.target,.targetmetrics').forEach(el=>{el.style.direction=lang==='ar'?'rtl':'ltr'});
  document.querySelectorAll('th').forEach(el=>el.style.textAlign=lang==='ar'?'right':'left');
+ document.querySelectorAll('td').forEach(el=>el.style.textAlign=lang==='ar'?'right':'left');
  const select=document.querySelector('#languageSelect');if(select&&select.value!==lang)select.value=lang;
  try{localStorage.setItem('dzra-language',lang)}catch(e){}
  translatePage(lang);
@@ -314,8 +315,8 @@ function translatePage(lang){
  }
  document.querySelectorAll('summary').forEach(el=>{const t=el.textContent.trim();if(dict[t])el.textContent=dict[t]});
 }
-const languageObserver=new MutationObserver(()=>{const lang=document.documentElement.lang||'en';translatePage(lang)});
-languageObserver.observe(document.body,{childList:true,subtree:true,characterData:true});
+const languageObserver=new MutationObserver(records=>{if(records.some(r=>r.type==='childList')){const lang=document.documentElement.lang||'en';translatePage(lang)}});
+languageObserver.observe(document.body,{childList:true,subtree:true});
 
 async function get(path){const r=await fetch(path);const d=await r.json();if(!r.ok)throw Error(d.detail||'Request failed');return d}
 function esc(v){return String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
