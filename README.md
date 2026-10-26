@@ -1,116 +1,66 @@
 # DZ Route Analyzer
 
-A lightweight native Debian 13 / Proxmox LXC dashboard for discovering IPv4 prefixes announced by configured ASNs, collecting repeatable measurements, and comparing historical latency and packet loss. Docker is not required.
+A lightweight FastAPI dashboard for recording the **public IPv4 address observed for your own internet connection** and comparing connection performance over time. Designed for a Debian LXC on Proxmox.
 
-## What it does
+## What it records
 
-- Discovers IPv4 prefixes announced in public routing data via RIPEstat.
-- Defaults to `AS36947` (Telecom Algeria / Algérie Télécom); verify the ASN against current routing data before drawing conclusions. `AS33779` belongs to Wataniya Telecom / Ooredoo Algeria, not Algérie Télécom.
-- Stores discovered prefixes, individual measurements, and collection runs in a local SQLite database at `data/measurements.sqlite3`.
-- Runs a scheduled collection cycle (default every 15 minutes) and also offers a manual collection action.
-- Measures a representative IPv4 address per discovered prefix, up to a configurable maximum each cycle.
-- Shows historical measurements and a preliminary ranking based on observed packet loss, latency, and sample count.
-- Retains the existing ping and traceroute diagnostic endpoints and the native systemd service.
+- External IPv4 observed via public-IP check services, with a timestamp.
+- The broad first-octet group (for example, \`41.x.x.x\`, \`105.x.x.x\`) and a convenient approximate \`/24\` label.
+- Latency, packet loss and ping jitter to stable targets (defaults: \`1.1.1.1\` and \`8.8.8.8\`).
+- Historical observations, changes of observed IP, and summary performance per broad IP group.
+- SQLite history stored in \`data/measurements.sqlite3\`.
 
-## Important measurement limits
+The collector runs automatically every 15 minutes by default. Use **Collect now** on the dashboard to record a sample immediately.
 
-This tool discovers prefixes announced by an ASN; that does not mean every address in a prefix is assigned, reachable, or equivalent in performance. It deliberately does **not** scan every address in a prefix. Each cycle measures one deterministic representative address per selected prefix, so rankings are preliminary and depend on whether that sample responds to ICMP. A failed/no-response ping is not proof that the address is unused or that the prefix is poor: routers and hosts can filter ICMP. Collect data over multiple days and use other permitted protocols or provider-approved targets before making operational decisions.
+## Important limitations
 
-RIPEstat is a public routing-data source, not an Algeria Telecom internal inventory. Prefixes can change, and public routing datasets can be incomplete or delayed. Configure only ASNs you have a reason to compare. Use the measurements responsibly and do not conduct broad port scans or unauthorized probing.
+- The IP is the address seen by an external IP-check service. If the ISP uses CGNAT, it may not be the exact address assigned to the OPNsense WAN interface.
+- The \`/24\` label is only a convenient grouping of the observed address. It does not claim to be Algérie Télécom's actual BGP route prefix.
+- A broad group is not guaranteed to be faster or better everywhere. Compare multiple samples at similar times; latency and packet loss can vary with congestion, destination and routing.
+- The app records changes in observed IP, but cannot prove that a modem reboot caused a change.
+- Rebooting the modem does not guarantee that Algérie Télécom will assign a preferred IP group.
+- This version no longer treats random sample addresses from all ASN-announced prefixes as a proxy for your own connection.
 
-## Install with one command
+## Install
 
-For an existing Debian LXC or Debian host, review the script first and then run it from a clone:
+On the Proxmox host, use the repository's installer for the intended LXC workflow. Existing deployment in the lab uses LXC ID \`213\`, IP \`192.168.1.213\`, dashboard port \`8088\`.
 
-```bash
-sudo apt update && sudo apt install -y git
-git clone https://github.com/ABCWeb3/dz-route-analyzer.git
-cd dz-route-analyzer
-sudo bash install.sh
-```
+## Update an existing installation
 
-The installer installs system packages, creates a Python virtual environment and a local `.env` file if one does not exist, registers the systemd service, and starts the dashboard.
+Run on the Proxmox host:
 
-## Create a new Proxmox LXC
+\`\`\`bash
+pct exec 213 -- bash -lc 'cd /opt/dz-route-analyzer && git pull --ff-only && bash update.sh'
+\`\`\`
 
-Run on the Proxmox VE host as root. This creates a **new** unprivileged Debian 13 LXC; it does not replace or modify an existing container:
+The updater preserves \`.env\` and the SQLite database. If the service does not start after updating, inspect it with:
 
-```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/ABCWeb3/dz-route-analyzer/main/proxmox-install.sh)"
-```
-
-The interactive installer asks for container ID, hostname, static IPv4/CIDR, gateway, bridge, storage, CPU, memory, disk, and DNS. Use an unused static address and reserve it or exclude it from DHCP. Review `proxmox-install.sh` before execution if you need to audit its actions.
-
-Open `http://<LXC-IP>:8088` after installation.
+\`\`\`bash
+pct exec 213 -- systemctl status dz-route-analyzer --no-pager
+pct exec 213 -- journalctl -u dz-route-analyzer -n 100 --no-pager
+\`\`\`
 
 ## Configuration
 
-The installer creates `.env` from `.env.example` only if it does not already exist. Existing local settings are preserved during a normal reinstall.
+Optional environment variables in \`.env\`:
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `WEB_HOST` | `0.0.0.0` | Dashboard bind address |
-| `WEB_PORT` | `8088` | Dashboard port |
-| `AUTO_TEST_INTERVAL_MINUTES` | `15` | Time between scheduled collection cycles (minimum 5) |
-| `PING_COUNT` | `5` | ICMP packets per target measurement |
-| `TARGET_ASNS` | `AS33779` | Comma-separated ASNs to discover |
-| `MAX_PREFIXES_PER_CYCLE` | `20` | Maximum prefixes sampled each cycle |
-| `TZ` | `Africa/Algiers` | Host/container timezone setting |
-
-After changing configuration, restart the service:
-
-```bash
-sudo systemctl restart dz-route-analyzer
-```
+- \`WEB_HOST\`: web bind address, default \`0.0.0.0\`.
+- \`WEB_PORT\`: dashboard port, default \`8088\`.
+- \`AUTO_TEST_INTERVAL_MINUTES\`: collection interval, default \`15\` (minimum 5).
+- \`PING_COUNT\`: pings per target, default \`5\`.
+- \`PROBE_TARGETS\`: comma-separated IP targets, default \`1.1.1.1,8.8.8.8\`.
+- \`TZ\`: system timezone preference; database timestamps are stored in UTC.
 
 ## Dashboard and API
 
-- `GET /` — historical dashboard and preliminary prefix ranking.
-- `GET /api/status` — service configuration and collection summary.
-- `GET /api/collect` — manually trigger one discovery/measurement cycle.
-- `GET /api/prefixes` — active prefixes and aggregated historical metrics.
-- `GET /api/history?limit=100` — recent measurements; optionally add `prefix=203.0.113.0/24`.
-- `GET /api/runs?limit=20` — collection run history.
-- `GET /api/ping?host=1.1.1.1` — manual ping diagnostic.
-- `GET /api/traceroute?host=1.1.1.1` — bounded traceroute diagnostic.
+- Dashboard: \`http://192.168.1.213:8088\` in the current lab deployment.
+- \`GET /api/status\`
+- \`GET /api/collect\`
+- \`GET /api/groups\`
+- \`GET /api/history?limit=100\`
+- \`GET /api/probes?limit=100\`
+- \`GET /api/ping?host=1.1.1.1\`
 
-The API runs on the local network by default. Do not expose it directly to the public internet without adding authentication and access controls.
+## Data and privacy
 
-## Service commands
-
-```bash
-sudo systemctl status dz-route-analyzer
-sudo journalctl -u dz-route-analyzer -f
-sudo systemctl restart dz-route-analyzer
-```
-
-On the Proxmox host, for CTID 213:
-
-```bash
-pct exec 213 -- systemctl status dz-route-analyzer
-pct exec 213 -- journalctl -u dz-route-analyzer -n 100 --no-pager
-```
-
-## Updating an existing installation
-
-The updater makes a timestamped backup of `.env` and `data/` under `/root/`, pulls the latest GitHub code, installs dependencies, and restarts the service. Run it inside the existing LXC as root:
-
-```bash
-cd /opt/dz-route-analyzer
-sudo bash update.sh
-```
-
-If the repository was cloned to a different path, substitute that path. If the update fails, the backup path is printed before the update begins.
-
-If the repository was cloned to a different path, substitute that path for `/opt/dz-route-analyzer`.
-
-## Project structure
-
-```text
-app/main.py                 FastAPI dashboard, discovery, SQLite, and probes
-requirements.txt            Python dependencies
-.env.example                Example configuration
-install.sh                  Native Debian installer
-proxmox-install.sh          Proxmox LXC installer
-dz-route-analyzer.service   systemd unit template
-```
+Measurements are stored locally in SQLite. The collector makes outbound requests to public-IP check services and sends ICMP echo requests to configured targets. It does not scan Algérie Télécom address ranges.
