@@ -25,6 +25,13 @@ AUTO_TEST_INTERVAL_MINUTES = max(5, int(os.getenv("AUTO_TEST_INTERVAL_MINUTES", 
 PROBE_TARGETS = [x.strip() for x in os.getenv("PROBE_TARGETS", "1.1.1.1,8.8.8.8").split(",") if x.strip()]
 DB_PATH = os.getenv("DB_PATH", os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "measurements.sqlite3"))
 cycle_lock = threading.Lock()
+progress_lock = threading.Lock()
+collection_progress = {"active": False, "percent": 0, "message": "جاهز لجمع البيانات", "updated_at": None}
+
+
+def set_progress(percent: int, message: str, active: bool = True):
+    with progress_lock:
+        collection_progress.update({"active": active, "percent": percent, "message": message, "updated_at": now_iso()})
 
 
 def connect_db():
@@ -121,11 +128,13 @@ def run_collection() -> dict[str, Any]:
         return {"ok": False, "message": "A collection cycle is already running"}
     started = now_iso()
     run_id = None
+    set_progress(5, "جارٍ الاتصال بخدمة التحقق من عنوان الإنترنت")
     try:
         with connect_db() as db:
             cur = db.execute("INSERT INTO collection_runs(started_at,status) VALUES(?,?)", (started, "running"))
             run_id = cur.lastrowid
         public_ip = get_public_ip()
+        set_progress(25, "تم رصد عنوان الإنترنت؛ جارٍ تصنيف المجموعة")
         ip_group, prefix24 = classify_ip(public_ip)
         with connect_db() as db:
             cur = db.execute(
@@ -134,7 +143,9 @@ def run_collection() -> dict[str, Any]:
             )
             observation_id = cur.lastrowid
         results = []
-        for target in PROBE_TARGETS:
+        total_targets = max(1, len(PROBE_TARGETS))
+        for index, target in enumerate(PROBE_TARGETS):
+            set_progress(35 + int(index * 55 / total_targets), "جارٍ قياس زمن الاستجابة وفقدان الحزم")
             result = measure_ip(target)
             results.append({"target": target, "ok": result.get("ok", False),
                             "avg_ms": result.get("avg_ms"), "loss_pct": result.get("loss_pct"),
@@ -146,13 +157,16 @@ def run_collection() -> dict[str, Any]:
                   (observation_id, now_iso(), target, int(bool(result.get("ok"))),
                    result.get("avg_ms"), result.get("min_ms"), result.get("max_ms"),
                    result.get("loss_pct"), result.get("jitter_ms"), result.get("error")))
+        set_progress(95, "جارٍ حفظ النتائج في السجل التاريخي")
         details = " | ".join(x["target"] + ": " + str(x.get("error")) for x in results if x.get("error"))
         with connect_db() as db:
             db.execute("UPDATE collection_runs SET finished_at=?,public_ip=?,status=?,details=? WHERE id=?",
                        (now_iso(), public_ip, "completed", details, run_id))
+        set_progress(100, "اكتملت عملية القياس بنجاح", active=False)
         return {"ok": True, "public_ip": public_ip, "ip_group": ip_group,
                 "prefix24": prefix24, "probes": results, "observed_at": started}
     except Exception as exc:
+        set_progress(100, "تعذّر إكمال العملية: " + str(exc), active=False)
         if run_id is not None:
             with connect_db() as db:
                 db.execute("UPDATE collection_runs SET finished_at=?,status='failed',details=? WHERE id=?",
@@ -296,6 +310,12 @@ def status() -> dict[str, Any]:
             "current": dict(current) if current else None, "last_run": dict(last_run) if last_run else None,
             "note": "Public IP observed by an external service; may differ from OPNsense WAN address under CGNAT.",
             "tools": {"ping": shutil.which("ping") is not None}}
+
+
+@app.get("/api/progress")
+def progress() -> dict[str, Any]:
+    with progress_lock:
+        return dict(collection_progress)
 
 
 @app.get("/api/collect")
