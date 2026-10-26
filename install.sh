@@ -6,11 +6,11 @@ APP_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SERVICE_FILE="/etc/systemd/system/${APP_NAME}.service"
 
 LOG_FILE="/var/log/dz-route-analyzer-install.log"
-RESET='\033[0m'
-CYAN='\033[36m'
-GREEN='\033[32m'
-RED='\033[31m'
-BOLD='\033[1m'
+RESET=$'\033[0m'
+CYAN=$'\033[36m'
+GREEN=$'\033[32m'
+RED=$'\033[31m'
+BOLD=$'\033[1m'
 : > "$LOG_FILE"
 progress() {
   local percent="$1" message="$2" width=24 filled bar empty
