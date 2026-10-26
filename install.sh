@@ -15,10 +15,8 @@ BOLD='\033[1m'
 progress() {
   local percent="$1" message="$2" width=24 filled bar empty
   filled=$((percent * width / 100))
-  printf -v bar '%*s' "$filled" ''
-  bar="\${bar// /█}"
-  printf -v empty '%*s' "$((width-filled))" ''
-  empty="\${empty// /░}"
+  bar=$(printf '%*s' "$filled" '' | tr ' ' '█')
+  empty=$(printf '%*s' "$((width-filled))" '' | tr ' ' '░')
   printf "\r%s[%s%s] %3d%%\033[0m %s\033[K\n" "$CYAN$BOLD" "$bar" "$empty" "$percent" "$message"
 }
 run_step() {
