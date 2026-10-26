@@ -310,7 +310,7 @@ function translatePage(lang){
   const original=originalText.get(node).trim();
   if(!original)continue;
   const translated=dict[original];
-  if(translated){const leading=originalText.get(node).match(/^\s*/)?.[0]||'';const trailing=originalText.get(node).match(/\s*$/)?.[0]||'';node.nodeValue=leading+translated+trailing;}
+  if(translated){const leading=originalText.get(node).match(/^\s*/)?.[0]||'';const trailing=originalText.get(node).match(/\s*$/)?.[0]||'';const desired=leading+translated+trailing;if(node.nodeValue!==desired)node.nodeValue=desired;}
  }
  document.querySelectorAll('summary').forEach(el=>{const t=el.textContent.trim();if(dict[t])el.textContent=dict[t]});
 }
