@@ -454,7 +454,8 @@ async function analyzeRoute(){
  finally{btn.disabled=false;btn.textContent=routeText('run')}
 }
 document.addEventListener('DOMContentLoaded',()=>{const m=document.getElementById('routeMessage');if(m)m.dataset.default='1';renderRouteLabels();loadRouteHistory()});
-\nlet activeLanguage='en';try{activeLanguage=localStorage.getItem('dzra-language')||'en'}catch(e){}setLanguage(activeLanguage);
+
+let activeLanguage='en';try{activeLanguage=localStorage.getItem('dzra-language')||'en'}catch(e){}setLanguage(activeLanguage);
 refreshAll();refreshProgress();setInterval(refreshAll,60000);setInterval(refreshProgress,1500);
 </script></main></body></html>"""
 
