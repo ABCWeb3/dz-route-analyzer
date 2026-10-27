@@ -339,6 +339,102 @@ main{max-width:1500px;padding-top:22px}
  .neon-alerts{min-height:0}
  .neon-topology{min-height:260px;max-height:none}
 }
+
+/* Unified design system: all legacy and new dashboard sections */
+:root{
+ --bg:#03051a;--panel:#080d25;--panel2:#0a102b;--line:#202f61;
+ --text:#edf2ff;--muted:#8e9fc9;--blue:#3978ff;--cyan:#22d8f0;
+ --green:#35f4a2;--amber:#ffd447;--red:#ff708b;
+}
+body{
+ background:radial-gradient(ellipse at 50% 12%,#10194b 0,transparent 42%),
+ radial-gradient(ellipse at 100% 45%,#0c123b 0,transparent 32%),var(--bg);
+}
+main{max-width:1500px}
+.top{border-bottom:1px solid #182553;padding-bottom:20px;margin-bottom:22px}
+.panel,.neon-card,#routeIntelligence{
+ background:linear-gradient(145deg,#080e2aee,#070b20f5);
+ border:1px solid #202f61;border-radius:18px;
+ box-shadow:0 10px 32px #0004,inset 0 1px #ffffff06;
+}
+.panel{padding:20px}
+.panel h2,.neon-card-head h2{color:#edf2ff}
+.hint,.subtitle,.footnote,.neon-muted{color:#8e9fc9}
+.stat,.target{
+ background:#090f29;border:1px solid #1b2a55;border-radius:13px;
+}
+.stat label,.stat small,.targetsub,.targetmetrics small{color:#8e9fc9}
+.chartwrap{height:230px}
+.chartwrap svg{filter:drop-shadow(0 0 3px #287eff12)}
+.tablewrap{border-radius:12px}
+table{color:#dce7ff}
+th{color:#8498c9;border-bottom-color:#202f61}
+td{color:#d6e1fb;border-bottom-color:#18254a}
+tbody tr:hover{background:#101b40}
+.barbg{background:#1a2850}
+.barfill{background:linear-gradient(90deg,#367dff,#22d8f0)}
+.pill{background:#07382f;color:#35f4a2;border:1px solid #145b50}
+.pill.warn{background:#382b12;color:#ffd447;border-color:#665019}
+.pill.error{background:#3b1529;color:#ff8198;border-color:#6d2840}
+.notice{background:#0b1432;border-color:#202f61;color:#c2d0f0}
+.statusline{color:#8e9fc9}
+#routeIntelligence{
+ margin-top:0!important;padding:0;overflow:hidden;
+ background:linear-gradient(145deg,#080e2aee,#070b20f5);
+ border-color:#202f61;
+}
+#routeIntelligence .route-hero{
+ background:linear-gradient(110deg,#0c1537,#0a1029);
+ border-bottom:1px solid #202f61;
+}
+#routeIntelligence .route-symbol{
+ background:linear-gradient(145deg,#103b88,#10264f);
+ border-color:#2758a4;color:#6de8ff;
+ box-shadow:0 0 24px #176eff24;
+}
+#routeIntelligence .route-message{
+ background:#0a1230;border-color:#202f61;color:#c2d0f0;
+}
+#routeIntelligence .route-kpi{
+ background:linear-gradient(145deg,#0a1230,#080e25);
+ border-color:#202f61;border-radius:13px;
+}
+#routeIntelligence .route-kpi-icon{
+ background:#0c1b43;color:#39d8ff;border:1px solid #243f83;
+}
+#routeIntelligence .route-subpanel{
+ background:#070c20;border-color:#202f61;border-radius:13px;
+}
+#routeIntelligence .route-section-head{
+ background:#0a1230;border-bottom-color:#202f61;
+}
+#routeIntelligence .route-section-tag{
+ color:#8bdfff;background:#0c1d42;border-color:#233e78;
+}
+#routeIntelligence th{color:#8498c9;border-bottom-color:#202f61}
+#routeIntelligence td{border-bottom-color:#18254a;color:#d6e1fb}
+#routeIntelligence tbody tr:hover{background:#101b40}
+#routeIntelligence .route-safety{
+ background:#070c20;border-top-color:#202f61;color:#8e9fc9;
+}
+#routeIntelligence #routeTarget{
+ background:#080e25;border-color:#24376d;
+}
+button,select{border-radius:11px}
+button{background:#101b40;border-color:#24376d}
+button:hover{border-color:#4c77e8;box-shadow:0 0 16px #244cff22}
+button.primary,#routeIntelligence #routeAnalyzeBtn{
+ background:linear-gradient(110deg,#2868f2,#3154d8);
+ border-color:#447bff;
+}
+.neon-test-button{
+ background:linear-gradient(110deg,#101d43,#151943);
+ border-color:#273d80;
+}
+@media(max-width:900px){
+ .panel{padding:16px}
+ .chartwrap{height:210px}
+}
 </style></head><body><main>
 <header class="top"><div class="brand"><div class="logo">⌁</div><div><h1>DZ Route Analyzer</h1><div class="subtitle">Internet connection intelligence · Algérie Télécom</div></div></div>
 <div class="actions"><select id="languageSelect" aria-label="Language" onchange="setLanguage(this.value)" style="font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:#17243a;color:var(--text);padding:10px 12px;border-radius:11px"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ar">🇩🇿 العربية</option></select><button onclick="refreshAll()">↻ Refresh</button><button class="primary" id="collectBtn" onclick="collect()">▶ Collect now</button></div></header>
