@@ -10,7 +10,10 @@ from typing import Any
 ALLOWED_TARGETS = {"1.1.1.1", "8.8.8.8"}
 
 def route_fingerprint(hops: list[dict[str, Any]]) -> str:
-    path = ">".join(str(hop.get("ip") or "*") for hop in hops)
+    # Fingerprint only responding routers. A timeout at an intermediate hop is
+    # common and must not, by itself, look like a route change.
+    responding_ips = [str(hop["ip"]) for hop in hops if hop.get("ip")]
+    path = ">".join(responding_ips)
     return hashlib.sha256(path.encode("utf-8")).hexdigest()
 
 def trace_route(target: str) -> dict[str, Any]:
