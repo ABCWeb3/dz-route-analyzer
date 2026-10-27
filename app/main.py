@@ -17,7 +17,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse
 
-from app.route_intelligence import ALLOWED_TARGETS, trace_route
+from app.route_intelligence import ALLOWED_TARGETS, route_fingerprint, trace_route
 
 APP_NAME = "DZ Route Analyzer"
 WEB_HOST = os.getenv("WEB_HOST", "0.0.0.0")
@@ -84,6 +84,16 @@ def init_db():
           finished_at TEXT, public_ip TEXT, status TEXT NOT NULL, details TEXT DEFAULT ''
         );
         """)
+        # Recompute stored fingerprints using the current algorithm. This keeps
+        # pre-upgrade history comparable after non-responding hops are ignored.
+        runs = db.execute("SELECT id FROM route_runs").fetchall()
+        for run in runs:
+            hops = [dict(row) for row in db.execute(
+                "SELECT hop_number,ip,rtt_ms,responded FROM route_hops WHERE route_run_id=? ORDER BY hop_number",
+                (run["id"],)
+            ).fetchall()]
+            fingerprint = route_fingerprint(hops)
+            db.execute("UPDATE route_runs SET fingerprint=? WHERE id=?", (fingerprint, run["id"]))
 
 
 def now_iso():
