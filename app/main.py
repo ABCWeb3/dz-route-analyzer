@@ -256,9 +256,94 @@ button:hover{border-color:#5d8de5;transform:translateY(-1px)}button.primary{back
 #routeIntelligence{padding:0;background:#0c1424;border:1px solid #263954;box-shadow:0 18px 48px #00000025}#routeIntelligence:before{display:none}#routeIntelligence .route-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px 26px;background:radial-gradient(ellipse at 0% 0%,#1e3b68 0,transparent 58%),linear-gradient(110deg,#14243c,#101a2c);border-bottom:1px solid #2a3d58}#routeIntelligence .route-heading{display:flex;align-items:center;gap:15px;min-width:220px}#routeIntelligence .route-symbol{display:grid;place-items:center;width:54px;height:54px;flex:0 0 54px;border:1px solid #3d6498;border-radius:17px;background:linear-gradient(145deg,#2457a5,#16314f);color:#8edff3;font-size:31px;box-shadow:0 8px 25px #07132680}#routeIntelligence .route-heading h2{font-size:21px;letter-spacing:-.35px;margin-top:4px}#routeIntelligence .route-heading .hint{max-width:520px;font-size:12px}#routeIntelligence .route-controls{display:grid;grid-template-columns:minmax(190px,1fr) auto;align-items:end;gap:9px;min-width:min(420px,48%)}#routeIntelligence .route-controls label{grid-column:1/-1;font-size:10px;letter-spacing:1.2px;font-weight:800;color:#8fa8c8}#routeIntelligence #routeTarget{width:100%;min-width:0;font:inherit;font-size:13px;border:1px solid #354c6b;background:#0a1424;color:var(--text);padding:12px;border-radius:10px}#routeIntelligence #routeAnalyzeBtn{padding:12px 16px;white-space:nowrap;box-shadow:0 6px 18px #2258c744}#routeIntelligence .route-message{display:flex;align-items:center;gap:10px;margin:18px 22px 0!important;padding:12px 15px;background:#111e31;border:1px solid #293d59;border-radius:11px;color:#c5d5ea}#routeIntelligence .route-message-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#68c8e5;box-shadow:0 0 12px #68c8e555}#routeIntelligence .route-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:18px 22px 20px}#routeIntelligence .route-kpi{display:flex;align-items:center;gap:12px;min-width:0;padding:15px;background:linear-gradient(145deg,#121f33,#0f1929);border:1px solid #243650;border-radius:13px}#routeIntelligence .route-kpi-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:11px;background:#1b3150;color:#80cfe7;font-size:21px}#routeIntelligence .route-kpi small{display:block;font-size:9px;letter-spacing:.85px;color:#8299b8;font-weight:800;margin-bottom:5px}#routeIntelligence .route-kpi strong{display:block;font-size:19px;line-height:1.2;overflow-wrap:anywhere;color:#f0f6ff}#routeIntelligence .route-kpi span:last-child{display:block;font-size:10px;color:#8294ae;margin-top:5px}#routeIntelligence .route-content-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px;padding:0 22px 18px}#routeIntelligence .route-subpanel{min-width:0;border:1px solid #243650;border-radius:13px;overflow:hidden;background:#0b1321}#routeIntelligence .route-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 16px 13px;border-bottom:1px solid #202f46;background:#101b2c}#routeIntelligence .route-section-head h3{font-size:13px;margin:0;font-weight:800}#routeIntelligence .route-section-head p{font-size:11px;color:#879ab5;margin:5px 0 0;line-height:1.45}#routeIntelligence .route-section-tag{font-size:9px;letter-spacing:.7px;font-weight:800;color:#8bbbd9;background:#172b42;border:1px solid #2b4763;border-radius:6px;padding:5px 7px;white-space:nowrap}#routeIntelligence .route-table-wrap{max-height:360px}#routeIntelligence table{min-width:500px;font-size:11px}#routeIntelligence th{padding:12px 10px;font-size:9px}#routeIntelligence td{padding:12px 10px;font-size:11px}#routeIntelligence .route-safety{margin:0;padding:14px 24px 20px;border-top:1px solid #202f46;background:#0a1220}#routeHistoryTitle{display:block}#routeHistoryTitle:before{display:none}
 @media(max-width:900px){.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.bigstats{grid-template-columns:repeat(2,minmax(0,1fr))}.top{align-items:flex-start;flex-direction:column}.actions{width:100%}}
 @media(max-width:900px){#routeIntelligence .route-hero{align-items:stretch;flex-direction:column;padding:20px}#routeIntelligence .route-controls{min-width:0;width:100%}#routeIntelligence .route-kpis{grid-template-columns:repeat(2,minmax(0,1fr));padding:14px 20px}#routeIntelligence .route-content-grid{grid-template-columns:minmax(0,1fr);padding:0 20px 18px}}@media(max-width:480px){#routeIntelligence .route-hero{padding:16px}#routeIntelligence .route-heading{align-items:flex-start;gap:10px}#routeIntelligence .route-symbol{width:42px;height:42px;flex-basis:42px;border-radius:13px;font-size:25px}#routeIntelligence .route-heading h2{font-size:18px}#routeIntelligence .route-controls{grid-template-columns:minmax(0,1fr)}#routeIntelligence .route-controls label{grid-column:auto}#routeIntelligence #routeAnalyzeBtn{width:100%}#routeIntelligence .route-kpis{gap:8px;padding:12px}#routeIntelligence .route-kpi{padding:10px;gap:8px;align-items:flex-start;flex-direction:column}#routeIntelligence .route-kpi strong{font-size:17px}#routeIntelligence .route-content-grid{padding:0 12px 14px}#routeIntelligence .route-message{margin-left:12px!important;margin-right:12px!important}main{padding:18px 12px 35px}.panel{padding:15px;border-radius:15px}.bigstats{gap:8px}.stat{padding:11px}.stat strong{font-size:17px}.ipvalue{font-size:30px}.actions button{flex:1}}
+
+/* Reference-inspired neon network overview */
+:root{--neon-blue:#25a8ff;--neon-cyan:#20e5f0;--neon-violet:#9360ff;--neon-green:#2df5a0;--neon-yellow:#ffd447}
+body{background:radial-gradient(ellipse at 51% 35%,#0b174c 0,transparent 36%),radial-gradient(ellipse at 92% 8%,#101044 0,transparent 32%),#03051a}
+main{max-width:1500px;padding-top:22px}
+.top{padding:10px 0 20px;border-bottom:1px solid #16234b}
+.logo{background:linear-gradient(135deg,#123b9d,#2cdded);box-shadow:0 0 28px #176eff40}
+.neon-overview{display:grid;grid-template-columns:minmax(250px,1.08fr) minmax(340px,1.55fr) minmax(260px,.95fr);grid-template-areas:"telemetry metrics tests" "alerts topology tests";gap:16px;margin:22px 0 20px;position:relative}
+.neon-card{position:relative;min-width:0;border:1px solid #24346c;border-radius:19px;background:linear-gradient(145deg,#080e2aee,#080b22f2);box-shadow:0 10px 35px #0005,inset 0 1px #ffffff08;overflow:hidden}
+.neon-card:before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,#4779ff,transparent);opacity:.65}
+.neon-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 19px 0}
+.neon-card-head h2{font-size:14px;letter-spacing:.1px;margin:0}
+.neon-tag{font-size:10px;color:#7ceac0;border:1px solid #146e60;background:#062c34;padding:5px 9px;border-radius:99px;white-space:nowrap}
+.neon-tag:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#2df5a0;margin-right:6px;box-shadow:0 0 8px #2df5a0}
+.neon-muted{color:#8595c2;font-size:11px;line-height:1.55}
+.neon-telemetry{grid-area:telemetry;min-height:238px}
+.neon-chart{height:164px;padding:12px 15px 9px}.neon-chart svg{width:100%;height:100%;display:block}
+.neon-metrics{grid-area:metrics;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-self:start;padding:15px 8px}
+.neon-metric{padding:7px 12px 9px;min-width:0;border-right:1px solid #17234b}.neon-metric:last-child{border:0}
+.neon-metric-label{font-size:10px;color:#b2bddb;min-height:24px}
+.neon-metric-main{display:flex;align-items:center;gap:8px;margin-top:7px}
+.neon-metric-icon{display:grid;place-items:center;width:35px;height:35px;flex:0 0 35px;border:1px solid currentColor;border-radius:50%;font-size:17px;box-shadow:0 0 15px #5338ff20}
+.neon-metric strong{display:block;font-size:clamp(16px,1.7vw,24px);letter-spacing:-.5px;overflow-wrap:anywhere}
+.neon-metric small{display:block;color:#7d8db9;font-size:10px;margin-top:5px}
+.neon-green{color:#35f4a2}.neon-purple{color:#a56bff}.neon-blue{color:#28c4ff}.neon-yellow{color:#ffd447}
+.neon-alerts{grid-area:alerts;padding-bottom:10px}
+.neon-alert{display:flex;gap:10px;margin:12px 13px 0;padding:12px;border:1px solid #15244b;border-radius:11px;background:#0a1230}
+.neon-alert-icon{font-size:17px;line-height:1.2}.neon-alert strong{display:block;font-size:11px;margin-bottom:4px}.neon-alert p{font-size:10px;color:#9aa9ce;margin:0;line-height:1.5}
+.neon-topology{grid-area:topology;min-height:285px;display:flex;flex-direction:column}
+.neon-topology-visual{flex:1;min-height:215px;position:relative;display:grid;place-items:center;padding:12px}
+.neon-topology-visual svg{width:100%;height:100%;min-height:210px;overflow:visible}
+.neon-topology-caption{text-align:center;padding:0 16px 15px;color:#8193c1;font-size:10px}
+.neon-tests{grid-area:tests;align-self:stretch;padding-bottom:12px}
+.neon-test-row{display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:8px;margin:0 13px;padding:14px 4px;border-bottom:1px solid #172348;font-size:11px}
+.neon-test-row:last-of-type{border-bottom:0}.neon-test-icon{color:#3ac9ff}.neon-test-value{text-align:right;font-weight:700;white-space:nowrap}.neon-test-value small{display:block;color:#35efa1;font-weight:500;font-size:10px;margin-top:4px}
+.neon-test-button{display:flex;align-items:center;justify-content:center;gap:12px;margin:14px 13px 3px;padding:13px;border:1px solid #273a81;border-radius:10px;background:linear-gradient(100deg,#11234d,#1b1b53);color:#f4f5ff;font-weight:750;width:calc(100% - 26px)}
+.neon-test-button:hover{border-color:#6562ff;box-shadow:0 0 22px #4338ff2c}
+.neon-features{display:flex;justify-content:center;gap:clamp(16px,4vw,52px);flex-wrap:wrap;margin:12px 0 25px;padding:10px}
+.neon-feature{text-align:center;color:#91a0ce;font-size:11px;min-width:62px}.neon-feature span{display:grid;place-items:center;width:45px;height:45px;margin:0 auto 8px;border:1px solid #1a3473;border-radius:14px;background:#080f30;color:#4a8cff;font-size:22px;box-shadow:0 0 18px #1745bd1a}
+#routeIntelligence{margin-top:20px!important}
+@media(max-width:1080px){.neon-overview{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"metrics metrics" "telemetry tests" "alerts topology"}.neon-metric{padding-left:14px;padding-right:14px}}
+@media(max-width:650px){.neon-overview{grid-template-columns:minmax(0,1fr);grid-template-areas:"metrics" "telemetry" "tests" "alerts" "topology";gap:12px}.neon-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 0}.neon-metric:nth-child(2){border-right:0}.neon-metric:nth-child(3),.neon-metric:nth-child(4){border-top:1px solid #17234b;padding-top:14px}.neon-card-head{padding-top:15px}.neon-topology{min-height:260px}}
 </style></head><body><main>
 <header class="top"><div class="brand"><div class="logo">⌁</div><div><h1>DZ Route Analyzer</h1><div class="subtitle">Internet connection intelligence · Algérie Télécom</div></div></div>
 <div class="actions"><select id="languageSelect" aria-label="Language" onchange="setLanguage(this.value)" style="font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:#17243a;color:var(--text);padding:10px 12px;border-radius:11px"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ar">🇩🇿 العربية</option></select><button onclick="refreshAll()">↻ Refresh</button><button class="primary" id="collectBtn" onclick="collect()">▶ Collect now</button></div></header>
+
+<section class="neon-overview" id="neonOverview" aria-label="Network monitoring overview">
+ <article class="neon-card neon-telemetry">
+  <div class="neon-card-head"><div><h2 id="neonTelemetryTitle">Real-time telemetry</h2><p class="neon-muted" style="margin:5px 0 0">Recent measured response times</p></div><span class="neon-tag" id="neonOnlineTag">Monitoring</span></div>
+  <div class="neon-chart" id="neonTelemetryChart"><div class="empty">Loading measured samples…</div></div>
+ </article>
+ <article class="neon-card neon-metrics">
+  <div class="neon-metric"><div class="neon-metric-label">Availability</div><div class="neon-metric-main"><span class="neon-metric-icon neon-green">⌁</span><div><strong id="neonAvailability">—</strong><small id="neonAvailabilitySub">Not enough data</small></div></div></div>
+  <div class="neon-metric"><div class="neon-metric-label">Latency (Ping)</div><div class="neon-metric-main"><span class="neon-metric-icon neon-purple">ϟ</span><div><strong id="neonLatency">—</strong><small id="neonLatencySub">Latest sample</small></div></div></div>
+  <div class="neon-metric"><div class="neon-metric-label">Jitter</div><div class="neon-metric-main"><span class="neon-metric-icon neon-blue">≋</span><div><strong id="neonJitter">—</strong><small id="neonJitterSub">Latest sample</small></div></div></div>
+  <div class="neon-metric"><div class="neon-metric-label">Packet loss</div><div class="neon-metric-main"><span class="neon-metric-icon neon-yellow">▥</span><div><strong id="neonLoss">—</strong><small id="neonLossSub">Latest sample</small></div></div></div>
+ </article>
+ <article class="neon-card neon-alerts">
+  <div class="neon-card-head"><h2>Smart alerts</h2><span class="neon-muted">Based on latest sample</span></div>
+  <div id="neonAlerts"><div class="neon-alert"><span class="neon-alert-icon">◌</span><div><strong>Waiting for measurements</strong><p>Run a collection to evaluate connection health.</p></div></div></div>
+ </article>
+ <article class="neon-card neon-topology">
+  <div class="neon-card-head"><h2>Network connection overview</h2><span class="neon-muted">Illustrative topology</span></div>
+  <div class="neon-topology-visual">
+   <svg viewBox="0 0 600 255" role="img" aria-label="Illustration of a device connected through a network to public DNS targets">
+    <defs><linearGradient id="neonPath" x1="0" x2="1"><stop offset="0" stop-color="#158dff"/><stop offset=".52" stop-color="#23e6f0"/><stop offset="1" stop-color="#27f5a0"/></linearGradient><radialGradient id="neonGlow"><stop stop-color="#315cff" stop-opacity=".25"/><stop offset="1" stop-color="#315cff" stop-opacity="0"/></radialGradient><filter id="neonBlur"><feGaussianBlur stdDeviation="5"/></filter></defs>
+    <ellipse cx="300" cy="140" rx="220" ry="98" fill="url(#neonGlow)"/><ellipse cx="300" cy="150" rx="195" ry="75" fill="none" stroke="#172c70" stroke-width="1"/><ellipse cx="300" cy="150" rx="145" ry="55" fill="none" stroke="#1c286b" stroke-width="1"/>
+    <path d="M95 168 C160 168 180 214 255 185 S360 125 420 167 S480 172 510 130" fill="none" stroke="url(#neonPath)" stroke-width="10" opacity=".18" filter="url(#neonBlur)"/><path d="M95 168 C160 168 180 214 255 185 S360 125 420 167 S480 172 510 130" fill="none" stroke="url(#neonPath)" stroke-width="3" stroke-linecap="round"/>
+    <g fill="#1c3b91" stroke="#1b9cff" stroke-width="2"><circle cx="95" cy="168" r="38" fill="#091a46"/><circle cx="510" cy="130" r="38" fill="#071d38" stroke="#2af5a2"/></g>
+    <g stroke="#6acaff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="80" y="149" width="30" height="34" rx="2"/><path d="M87 156h4m5 0h4m5 0h1M87 164h4m5 0h4m5 0h1M87 172h4m5 0h4m5 0h1M92 183v-7h8v7"/></g>
+    <g stroke="#54ffc0" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M490 134a13 13 0 0 1 25-5 11 11 0 0 1 4 22h-30a9 9 0 0 1 1-17z"/></g>
+    <g stroke="#4c6dff" fill="none" stroke-width="1.5" opacity=".8"><path d="M300 43v40M280 63h40"/><circle cx="300" cy="63" r="28"/><circle cx="300" cy="63" r="42"/></g><g fill="#a8b7ff"><circle cx="300" cy="63" r="4"/><circle cx="255" cy="185" r="4" fill="#28e9ef"/><circle cx="420" cy="167" r="4" fill="#38ffb1"/><circle cx="180" cy="195" r="3" fill="#279bff"/></g>
+    <g fill="#a9b7dc" font-size="11" text-anchor="middle"><text x="95" y="222">Your network</text><text x="300" y="119">Internet</text><text x="510" y="184">Public DNS</text></g>
+   </svg>
+  </div><div class="neon-topology-caption">Conceptual illustration — actual hops and addresses are shown in Route Intelligence below.</div>
+ </article>
+ <article class="neon-card neon-tests">
+  <div class="neon-card-head"><h2>Connection tests</h2><span class="neon-muted">Latest collected values</span></div>
+  <div class="neon-test-row"><span class="neon-test-icon">↓</span><span>Download bandwidth</span><span class="neon-test-value" id="neonDownload">Not measured<small>Speed test unavailable</small></span></div>
+  <div class="neon-test-row"><span class="neon-test-icon">↑</span><span>Upload bandwidth</span><span class="neon-test-value" id="neonUpload">Not measured<small>Speed test unavailable</small></span></div>
+  <div class="neon-test-row"><span class="neon-test-icon">⌁</span><span>Ping</span><span class="neon-test-value" id="neonTestPing">—<small>Waiting for data</small></span></div>
+  <div class="neon-test-row"><span class="neon-test-icon">≋</span><span>Jitter</span><span class="neon-test-value" id="neonTestJitter">—<small>Waiting for data</small></span></div>
+  <div class="neon-test-row"><span class="neon-test-icon">⌖</span><span>Traceroute</span><span class="neon-test-value" id="neonTraceroute">Not run<small>On-demand only</small></span></div>
+  <button class="neon-test-button" onclick="collect()">Run new collection <span aria-hidden="true">›</span></button>
+ </article>
+</section>
+<div class="neon-features" aria-label="Project capabilities"><div class="neon-feature"><span>⬡</span>Reliable</div><div class="neon-feature"><span>ϟ</span>Fast checks</div><div class="neon-feature"><span>◎</span>Measured</div><div class="neon-feature"><span>▥</span>Historical</div></div>
+
 <section class="panel span12" id="routeIntelligence" style="margin-top:16px">
 <div class="route-hero">
  <div class="route-heading"><div class="route-symbol">⌁</div><div><div class="eyebrow">NETWORK PATH ANALYSIS</div><h2 id="routeTitle">Route Intelligence</h2><p class="hint" id="routeHint">Compare network hops over time. Run analysis on demand.</p></div></div>
@@ -412,9 +497,49 @@ function renderChart(items){
 async function refreshProgress(){
  try{const p=await get('/api/progress');document.querySelector('#progressMessage').textContent=p.message||'جاهز لجمع البيانات';document.querySelector('#progressPercent').textContent=(p.percent||0)+'%';document.querySelector('#progressBar').style.width=(p.percent||0)+'%';document.querySelector('#progressIcon').textContent=p.active?'◌':'✓';document.querySelector('#progressIcon').style.color=p.active?'var(--cyan)':'var(--green)';}catch(e){}
 }
+
+function renderNeonTelemetry(items, probes){
+ const el=document.getElementById('neonTelemetryChart');
+ const ordered=(items||[]).slice().reverse();
+ const vals=ordered.map(o=>{const ps=(probes||[]).filter(p=>p.observation_id===o.id&&p.avg_ms!=null);return {o, a:ps.length?ps.reduce((s,p)=>s+Number(p.avg_ms),0)/ps.length:null}}).filter(x=>x.a!=null);
+ if(!vals.length){el.innerHTML='<div class="empty">Latency chart will appear after successful measurements.</div>';return}
+ const W=500,H=160,L=35,R=8,T=10,B=24,pw=W-L-R,ph=H-T-B,max=Math.max(10,...vals.map(x=>x.a))*1.2;
+ const grid=[0,.33,.66,1].map(q=>{const y=T+ph*q;return '<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'" stroke="#17254e" stroke-dasharray="3 5"/><text x="'+(L-7)+'" y="'+(y+3)+'" fill="#7285b5" font-size="9" text-anchor="end">'+(max*(1-q)).toFixed(0)+'</text>'}).join('');
+ const pts=vals.map((x,i)=>(L+(vals.length<2?pw/2:i/(vals.length-1)*pw))+','+(T+ph-x.a/max*ph)).join(' ');
+ const area='M '+pts.replace(/ /g,' L ')+' L '+(L+pw)+' '+(T+ph)+' L '+L+' '+(T+ph)+' Z';
+ el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Measured latency trend"><defs><linearGradient id="teleArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7254ff" stop-opacity=".45"/><stop offset="1" stop-color="#287eff" stop-opacity="0"/></linearGradient></defs>'+grid+'<path d="'+area+'" fill="url(#teleArea)"/><polyline points="'+pts+'" fill="none" stroke="#6f6bff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><polyline points="'+vals.map((x,i)=>(L+(vals.length<2?pw/2:i/(vals.length-1)*pw))+','+(T+ph-x.a/max*ph+7*Math.sin(i*1.8))).join(' ')+'" fill="none" stroke="#178eff" stroke-width="1.5" opacity=".8"/>'+vals.map((x,i)=>'<circle cx="'+(L+(vals.length<2?pw/2:i/(vals.length-1)*pw))+'" cy="'+(T+ph-x.a/max*ph)+'" r="2.5" fill="#69dfff"/>').join('')+'<text x="'+L+'" y="'+(H-5)+'" fill="#7285b5" font-size="9">'+esc(date(vals[0].o.observed_at))+'</text><text x="'+(W-R)+'" y="'+(H-5)+'" fill="#7285b5" font-size="9" text-anchor="end">'+esc(date(vals[vals.length-1].o.observed_at))+'</text></svg>';
+}
+function updateNeonOverview(status,history,probes){
+ const latest=history.items&&history.items[0], ps=latest?probes.items.filter(p=>p.observation_id===latest.id):[];
+ const measured=ps.filter(p=>p.avg_ms!=null), avg=measured.length?measured.reduce((s,p)=>s+Number(p.avg_ms),0)/measured.length:null;
+ const js=measured.map(p=>p.jitter_ms).filter(v=>v!=null).map(Number), jitter=js.length?js.reduce((s,v)=>s+v,0)/js.length:null;
+ const ls=ps.filter(p=>p.loss_pct!=null).map(p=>Number(p.loss_pct)), loss=ls.length?ls.reduce((s,v)=>s+v,0)/ls.length:null;
+ const availability=ps.length?ps.filter(p=>p.ok).length/ps.length*100:null;
+ document.getElementById('neonAvailability').textContent=availability==null?'—':availability.toFixed(1)+'%';
+ document.getElementById('neonAvailabilitySub').textContent=availability==null?'Not enough data':(availability>=99?'Healthy':'Latest probe success');
+ document.getElementById('neonLatency').textContent=avg==null?'—':avg.toFixed(1)+' ms';
+ document.getElementById('neonJitter').textContent=jitter==null?'—':jitter.toFixed(1)+' ms';
+ document.getElementById('neonLoss').textContent=loss==null?'—':loss.toFixed(1)+'%';
+ document.getElementById('neonLossSub').textContent=loss==null?'Latest sample':loss===0?'No loss observed':'Observed loss';
+ document.getElementById('neonTestPing').innerHTML=(avg==null?'—':avg.toFixed(1)+' ms')+'<small>'+(avg==null?'Waiting for data':'Measured')+'</small>';
+ document.getElementById('neonTestJitter').innerHTML=(jitter==null?'—':jitter.toFixed(1)+' ms')+'<small>'+(jitter==null?'Waiting for data':'Measured')+'</small>';
+ document.getElementById('neonOnlineTag').textContent=status.last_run&&status.last_run.status==='failed'?'Needs attention':'Monitoring';
+ const alerts=[];
+ if(!latest)alerts.push(['◌','Waiting for measurements','Start a collection to assess connection health.','#7285b5']);
+ else{
+  if(ps.some(p=>!p.ok))alerts.push(['⚠','One or more probes incomplete','A target did not return a complete measurement. This alone does not prove an ISP fault.','#ffd447']);
+  if(loss!=null&&loss>0)alerts.push(['⚠','Packet loss observed','Latest aggregate packet-loss estimate: '+loss.toFixed(1)+'%. Repeat tests to confirm.','#ffd447']);
+  if(avg!=null&&avg>100)alerts.push(['ⓘ','Elevated response time','Latest average latency is '+avg.toFixed(1)+' ms. Compare against your baseline.','#a56bff']);
+  if(!alerts.length)alerts.push(['✓','Connection measurements available','Latest probes completed without reported packet loss.','#35f4a2']);
+ }
+ document.getElementById('neonAlerts').innerHTML=alerts.map(a=>'<div class="neon-alert"><span class="neon-alert-icon" style="color:'+a[3]+'">'+a[0]+'</span><div><strong>'+esc(a[1])+'</strong><p>'+esc(a[2])+'</p></div></div>').join('');
+ renderNeonTelemetry(history.items||[],probes.items||[]);
+}
+
 async function refreshAll(){
  try{
  const [s,g,h,p]=await Promise.all([get('/api/status'),get('/api/groups'),get('/api/history?limit=60'),get('/api/probes?limit=120')]);
+ updateNeonOverview(s,h,p);
  const c=s.current||{},latest=h.items[0],latestProbes=p.items.filter(x=>latest&&x.observation_id===latest.id);
  document.querySelector('#currentIP').textContent=c.public_ip||'Waiting for first sample';
  document.querySelector('#currentGroup').textContent=c.ip_group?'◉ '+c.ip_group:'◉ No IP observed yet';
