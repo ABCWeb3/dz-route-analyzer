@@ -17,6 +17,8 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse
 
+from app.route_intelligence import ALLOWED_TARGETS, trace_route
+
 APP_NAME = "DZ Route Analyzer"
 WEB_HOST = os.getenv("WEB_HOST", "0.0.0.0")
 WEB_PORT = int(os.getenv("WEB_PORT", "8088"))
@@ -468,6 +470,85 @@ def probes(limit: int = Query(default=100, ge=1, le=1000)) -> dict[str, Any]:
           ORDER BY p.id DESC LIMIT ?
         """, (limit,)).fetchall()
     return {"items": [dict(r) for r in rows]}
+
+
+
+@app.post("/api/routes/analyze")
+def analyze_route(target: str = Query(default="1.1.1.1")) -> dict[str, Any]:
+    if target not in ALLOWED_TARGETS:
+        raise HTTPException(status_code=400, detail="Allowed targets: 1.1.1.1, 8.8.8.8")
+    try:
+        result = trace_route(target)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=504, detail="Route trace timed out after 35 seconds")
+    except OSError as exc:
+        raise HTTPException(status_code=500, detail="Could not execute traceroute: " + str(exc))
+    tested_at = now_iso()
+    with connect_db() as db:
+        previous = db.execute(
+            "SELECT id,fingerprint FROM route_runs WHERE target=? ORDER BY id DESC LIMIT 1",
+            (target,)
+        ).fetchone()
+        previous_hops = []
+        if previous:
+            previous_hops = [dict(row) for row in db.execute(
+                "SELECT hop_number,ip,rtt_ms,responded FROM route_hops WHERE route_run_id=? ORDER BY hop_number",
+                (previous["id"],)
+            ).fetchall()]
+        cur = db.execute(
+            "INSERT INTO route_runs(tested_at,target,fingerprint,hop_count,reached,raw_error) VALUES(?,?,?,?,?,?)",
+            (tested_at,target,result["fingerprint"],result["hop_count"],int(result["reached"]),result["raw_error"])
+        )
+        run_id = cur.lastrowid
+        for hop in result["hops"]:
+            db.execute(
+                "INSERT INTO route_hops(route_run_id,hop_number,ip,rtt_ms,responded) VALUES(?,?,?,?,?)",
+                (run_id,hop["hop_number"],hop["ip"],hop["rtt_ms"],int(hop["responded"]))
+            )
+        change = None
+        if previous and previous["fingerprint"] != result["fingerprint"]:
+            old = {int(h["hop_number"]): h.get("ip") for h in previous_hops}
+            new = {int(h["hop_number"]): h.get("ip") for h in result["hops"]}
+            differences = []
+            for number in sorted(set(old) | set(new)):
+                if old.get(number) != new.get(number):
+                    differences.append({"hop": number, "before": old.get(number), "after": new.get(number)})
+            change = {"type": "route_changed", "changes": differences}
+            db.execute(
+                "INSERT INTO route_events(detected_at,target,event_type,previous_fingerprint,current_fingerprint,details) VALUES(?,?,?,?,?,?)",
+                (tested_at,target,"route_changed",previous["fingerprint"],result["fingerprint"],
+                 "Hop IP sequence changed; non-responding hops are not proof of packet loss or ISP fault.")
+            )
+    return {**result, "id": run_id, "tested_at": tested_at, "previous_fingerprint": previous["fingerprint"] if previous else None,
+            "changed": bool(previous and previous["fingerprint"] != result["fingerprint"]), "change": change,
+            "interpretation_note": "Traceroute hops that do not reply may filter diagnostic traffic. This alone does not prove packet loss or an ISP fault."}
+
+
+@app.get("/api/routes/history")
+def route_history(target: str | None = Query(default=None), limit: int = Query(default=50, ge=1, le=500)) -> dict[str, Any]:
+    if target is not None and target not in ALLOWED_TARGETS:
+        raise HTTPException(status_code=400, detail="Allowed targets: 1.1.1.1, 8.8.8.8")
+    with connect_db() as db:
+        if target:
+            rows = db.execute("SELECT * FROM route_runs WHERE target=? ORDER BY id DESC LIMIT ?", (target,limit)).fetchall()
+        else:
+            rows = db.execute("SELECT * FROM route_runs ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+        items = []
+        for row in rows:
+            item = dict(row)
+            item["hops"] = [dict(hop) for hop in db.execute(
+                "SELECT hop_number,ip,rtt_ms,responded FROM route_hops WHERE route_run_id=? ORDER BY hop_number",
+                (row["id"],)
+            ).fetchall()]
+            items.append(item)
+        events = [dict(event) for event in db.execute(
+            "SELECT * FROM route_events ORDER BY id DESC LIMIT 100"
+        ).fetchall()]
+    return {"items": items, "events": events, "allowed_targets": sorted(ALLOWED_TARGETS)}
 
 
 @app.get("/api/ping")
