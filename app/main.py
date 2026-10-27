@@ -298,6 +298,47 @@ main{max-width:1500px;padding-top:22px}
 #routeIntelligence{margin-top:20px!important}
 @media(max-width:1080px){.neon-overview{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"metrics metrics" "telemetry tests" "alerts topology"}.neon-metric{padding-left:14px;padding-right:14px}}
 @media(max-width:650px){.neon-overview{grid-template-columns:minmax(0,1fr);grid-template-areas:"metrics" "telemetry" "tests" "alerts" "topology";gap:12px}.neon-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 0}.neon-metric:nth-child(2){border-right:0}.neon-metric:nth-child(3),.neon-metric:nth-child(4){border-top:1px solid #17234b;padding-top:14px}.neon-card-head{padding-top:15px}.neon-topology{min-height:260px}}
+
+/* Layout refinement after visual review against the reference */
+.neon-overview{
+ grid-template-columns:minmax(270px,1.02fr) minmax(380px,1.42fr) minmax(285px,.92fr);
+ grid-template-rows:minmax(205px,auto) minmax(255px,auto);
+ gap:14px;
+ align-items:stretch;
+}
+.neon-telemetry{min-height:0;height:100%}
+.neon-chart{height:clamp(145px,13vw,190px)}
+.neon-metrics{align-self:start;min-height:148px;padding:12px 5px}
+.neon-metric{padding:6px 9px 7px}
+.neon-metric-label{font-size:10px;min-height:18px;white-space:nowrap}
+.neon-metric-main{gap:6px;margin-top:5px}
+.neon-metric-icon{width:30px;height:30px;flex-basis:30px;font-size:15px}
+.neon-metric strong{font-size:clamp(14px,1.45vw,21px);white-space:nowrap;overflow-wrap:normal;letter-spacing:-.6px}
+.neon-metric small{font-size:9px;white-space:nowrap}
+.neon-tests{height:100%;max-height:510px;min-height:0;align-self:stretch;overflow:auto;scrollbar-width:thin;scrollbar-color:#273a81 transparent}
+.neon-test-row{padding:11px 4px}
+.neon-test-button{padding:11px}
+.neon-alerts{align-self:start;min-height:255px;height:auto}
+.neon-alert{margin-top:10px;padding:10px 11px}
+.neon-topology{min-height:285px;height:100%;max-height:330px}
+.neon-topology-visual{min-height:205px}
+.neon-features{margin:8px 0 20px;padding:6px}
+@media(max-width:1080px){
+ .neon-overview{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto;grid-template-areas:"metrics metrics" "telemetry tests" "alerts topology"}
+ .neon-tests{height:auto;max-height:none}
+ .neon-metric{padding-left:10px;padding-right:10px}
+ .neon-metric strong{font-size:clamp(14px,2vw,21px)}
+}
+@media(max-width:650px){
+ .neon-overview{grid-template-columns:minmax(0,1fr);grid-template-areas:"metrics" "telemetry" "tests" "alerts" "topology";gap:12px}
+ .neon-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 0}
+ .neon-metric:nth-child(2){border-right:0}
+ .neon-metric:nth-child(3),.neon-metric:nth-child(4){border-top:1px solid #17234b;padding-top:14px}
+ .neon-metric strong{font-size:19px}
+ .neon-tests{height:auto;max-height:none}
+ .neon-alerts{min-height:0}
+ .neon-topology{min-height:260px;max-height:none}
+}
 </style></head><body><main>
 <header class="top"><div class="brand"><div class="logo">⌁</div><div><h1>DZ Route Analyzer</h1><div class="subtitle">Internet connection intelligence · Algérie Télécom</div></div></div>
 <div class="actions"><select id="languageSelect" aria-label="Language" onchange="setLanguage(this.value)" style="font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:#17243a;color:var(--text);padding:10px 12px;border-radius:11px"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ar">🇩🇿 العربية</option></select><button onclick="refreshAll()">↻ Refresh</button><button class="primary" id="collectBtn" onclick="collect()">▶ Collect now</button></div></header>
