@@ -61,6 +61,24 @@ def init_db():
           FOREIGN KEY(observation_id) REFERENCES ip_observations(id)
         );
         CREATE INDEX IF NOT EXISTS idx_probe_observation ON probe_results(observation_id);
+        CREATE TABLE IF NOT EXISTS route_runs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT, tested_at TEXT NOT NULL,
+          target TEXT NOT NULL, fingerprint TEXT NOT NULL, hop_count INTEGER NOT NULL,
+          reached INTEGER NOT NULL, raw_error TEXT DEFAULT ''
+        );
+        CREATE INDEX IF NOT EXISTS idx_route_runs_target_time ON route_runs(target, tested_at);
+        CREATE TABLE IF NOT EXISTS route_hops (
+          id INTEGER PRIMARY KEY AUTOINCREMENT, route_run_id INTEGER NOT NULL,
+          hop_number INTEGER NOT NULL, ip TEXT, rtt_ms REAL, responded INTEGER NOT NULL,
+          FOREIGN KEY(route_run_id) REFERENCES route_runs(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_route_hops_run ON route_hops(route_run_id);
+        CREATE TABLE IF NOT EXISTS route_events (
+          id INTEGER PRIMARY KEY AUTOINCREMENT, detected_at TEXT NOT NULL,
+          target TEXT NOT NULL, event_type TEXT NOT NULL, previous_fingerprint TEXT,
+          current_fingerprint TEXT NOT NULL, details TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_route_events_time ON route_events(detected_at);
         CREATE TABLE IF NOT EXISTS collection_runs (
           id INTEGER PRIMARY KEY AUTOINCREMENT, started_at TEXT NOT NULL,
           finished_at TEXT, public_ip TEXT, status TEXT NOT NULL, details TEXT DEFAULT ''
@@ -229,7 +247,13 @@ button:hover{border-color:#5d8de5;transform:translateY(-1px)}button.primary{back
 </style></head><body><main>
 <header class="top"><div class="brand"><div class="logo">⌁</div><div><h1>DZ Route Analyzer</h1><div class="subtitle">Internet connection intelligence · Algérie Télécom</div></div></div>
 <div class="actions"><select id="languageSelect" aria-label="Language" onchange="setLanguage(this.value)" style="font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:#17243a;color:var(--text);padding:10px 12px;border-radius:11px"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ar">🇩🇿 العربية</option></select><button onclick="refreshAll()">↻ Refresh</button><button class="primary" id="collectBtn" onclick="collect()">▶ Collect now</button></div></header>
-<div class="statusline"><span id="statusDot" class="dot"></span><span id="statusText">Connecting to collector…</span><span id="updated" style="margin-left:auto"></span></div>
+<section class="panel span12" id="routeIntelligence" style="margin-top:16px">
+<div class="panelhead"><div><div class="eyebrow">NETWORK PATH</div><h2 id="routeTitle">Route Intelligence</h2><p class="hint" id="routeHint">Compare network hops over time. Run analysis on demand.</p></div><div class="actions"><select id="routeTarget" aria-label="Route target" style="font:inherit;font-size:13px;border:1px solid var(--line);background:#17243a;color:var(--text);padding:10px;border-radius:11px"><option value="1.1.1.1">1.1.1.1 · Cloudflare</option><option value="8.8.8.8">8.8.8.8 · Google</option></select><button class="primary" id="routeAnalyzeBtn" onclick="analyzeRoute()">Analyze route</button></div></div>
+<div id="routeMessage" class="notice" style="margin-top:0">Route analysis has not run yet. No traceroute is performed automatically.</div>
+<div class="tablewrap" style="margin-top:14px"><table><thead><tr><th id="routeHopHead">Hop</th><th id="routeIpHead">IP address</th><th id="routeRttHead">RTT</th><th id="routeStateHead">Response</th></tr></thead><tbody id="routeHops"><tr><td colspan="4" class="empty">Run an analysis to see hops.</td></tr></tbody></table></div>
+<h2 style="margin-top:20px" id="routeHistoryTitle">Recent route runs</h2><div class="tablewrap" style="margin-top:10px"><table><thead><tr><th id="routeTimeHead">Time</th><th>Target</th><th id="routeCountHead">Hops</th><th id="routeFingerprintHead">Fingerprint</th><th id="routeChangeHead">Change</th></tr></thead><tbody id="routeRuns"><tr><td colspan="5" class="empty">No route history yet.</td></tr></tbody></table></div>
+<p class="footnote" id="routeSafetyNote">A hop that does not respond may filter traceroute probes. It is not proof of packet loss or ISP fault. Route checks are limited to the two listed public targets.</p>
+</section>\n<div class="statusline"><span id="statusDot" class="dot"></span><span id="statusText">Connecting to collector…</span><span id="updated" style="margin-left:auto"></span></div>
 <section class="panel" style="margin-bottom:16px;padding:15px 18px"><div style="display:flex;align-items:center;gap:12px"><span id="progressIcon" style="font-size:18px;color:var(--cyan)">◌</span><div style="flex:1;min-width:0"><div id="progressMessage" style="font-size:13px;font-weight:700">جاهز لجمع البيانات</div><div style="height:6px;background:#26354c;border-radius:99px;overflow:hidden;margin-top:9px"><div id="progressBar" style="height:100%;width:0;background:linear-gradient(90deg,#3978f6,#62d8e8);border-radius:99px;transition:width .3s"></div></div></div><strong id="progressPercent" style="font-size:13px;min-width:38px;text-align:right">0%</strong></div></section>
 <div class="grid">
 <section class="panel span12"><div class="iphero"><div><div class="eyebrow">Current observed public IPv4</div><div class="ipvalue mono" id="currentIP">—</div><div id="currentGroup" class="groupbadge">◉ Waiting for first observation</div></div><div><div class="eyebrow">Last observation</div><div id="currentTime" style="font-size:14px;font-weight:700;margin-top:9px">—</div><div class="hint" id="changeText">Changes are recorded automatically</div></div></div>
@@ -399,7 +423,38 @@ async function collect(){
  catch(e){t.textContent='Collection failed';document.querySelector('#progressMessage').textContent='تعذّر إكمال العملية'}
  finally{clearInterval(poll);b.disabled=false;b.textContent='▶ Collect now';document.querySelector('#statusDot').className='dot';}
 }
-let activeLanguage='en';try{activeLanguage=localStorage.getItem('dzra-language')||'en'}catch(e){}setLanguage(activeLanguage);
+const routeWords={
+en:{title:'Route Intelligence',hint:'Compare network hops over time. Run analysis on demand.',run:'Analyze route',running:'Tracing route…',noRun:'Route analysis has not run yet. No traceroute is performed automatically.',hop:'Hop',ip:'IP address',rtt:'RTT',response:'Response',yes:'Responded',no:'No reply',history:'Recent route runs',time:'Time',count:'Hops',fingerprint:'Fingerprint',change:'Change',changed:'Changed',same:'Unchanged',none:'No route history yet.',safety:'A hop that does not respond may filter traceroute probes. It is not proof of packet loss or ISP fault. Route checks are limited to the two listed public targets.',error:'Route analysis failed'},
+fr:{title:'Intelligence de routage',hint:'Comparez les sauts réseau dans le temps. Lancez une analyse à la demande.',run:'Analyser la route',running:'Traçage en cours…',noRun:'Aucune analyse effectuée. Le traceroute ne démarre pas automatiquement.',hop:'Saut',ip:'Adresse IP',rtt:'RTT',response:'Réponse',yes:'Réponse reçue',no:'Aucune réponse',history:'Analyses récentes',time:'Date',count:'Sauts',fingerprint:'Empreinte',change:'Changement',changed:'Modifiée',same:'Inchangée',none:'Aucun historique de route.',safety:'Un saut silencieux peut filtrer les sondes traceroute. Cela ne prouve ni une perte de paquets ni une faute du FAI. Les tests sont limités aux deux cibles publiques listées.',error:'Échec de l’analyse'},
+ar:{title:'ذكاء المسارات',hint:'قارن قفزات الشبكة عبر الزمن، وشغّل التحليل عند الطلب.',run:'تحليل المسار',running:'جارٍ تتبع المسار…',noRun:'لم يُجرَ تحليل بعد. لن يعمل traceroute تلقائيًا.',hop:'القفزة',ip:'عنوان IP',rtt:'زمن الاستجابة',response:'الاستجابة',yes:'استجابت',no:'لا توجد استجابة',history:'عمليات تحليل المسار الأخيرة',time:'الوقت',count:'القفزات',fingerprint:'بصمة المسار',change:'التغيير',changed:'تغيّر',same:'لم يتغير',none:'لا يوجد سجل للمسارات بعد.',safety:'قد تمنع إحدى القفزات ردود traceroute. هذا لا يثبت فقدان الحزم أو وجود خلل لدى مزود الإنترنت. يقتصر الفحص على العنوانين العامين المعروضين.',error:'فشل تحليل المسار'}
+};
+function routeText(key){return (routeWords[activeLanguage]||routeWords.en)[key]||routeWords.en[key]||key}
+function renderRouteLabels(){
+ const map={routeTitle:'title',routeHint:'hint',routeAnalyzeBtn:'run',routeHopHead:'hop',routeIpHead:'ip',routeRttHead:'rtt',routeStateHead:'response',routeHistoryTitle:'history',routeTimeHead:'time',routeCountHead:'count',routeFingerprintHead:'fingerprint',routeChangeHead:'change',routeSafetyNote:'safety'};
+ for(const [id,key] of Object.entries(map)){const el=document.getElementById(id);if(el){if(id==='routeAnalyzeBtn'&&!el.disabled)el.textContent=routeText(key);else if(id!=='routeAnalyzeBtn')el.textContent=routeText(key)}}
+ const m=document.getElementById('routeMessage');if(m&&m.dataset.default==='1')m.textContent=routeText('noRun');
+}
+async function loadRouteHistory(){
+ try{const data=await get('/api/routes/history?limit=20');const rows=data.items||[];
+ document.getElementById('routeRuns').innerHTML=rows.map(x=>'<tr>'+cell(date(x.tested_at))+cell(x.target,'mono')+cell(x.hop_count)+cell(String(x.fingerprint||'').slice(0,12),'mono')+cell(x.changed?routeText('changed'):routeText('same'))+'</tr>').join('')||'<tr><td colspan="5" class="empty">'+routeText('none')+'</td></tr>';
+ }catch(e){console.error(e)}
+}
+async function analyzeRoute(){
+ const btn=document.getElementById('routeAnalyzeBtn'),target=document.getElementById('routeTarget').value,msg=document.getElementById('routeMessage');
+ btn.disabled=true;btn.textContent=routeText('running');msg.textContent=routeText('running');
+ try{
+ const response=await fetch('/api/routes/analyze?target='+encodeURIComponent(target),{method:'POST'});
+ const data=await response.json();if(!response.ok)throw new Error(data.detail||routeText('error'));
+ msg.textContent=data.changed?routeText('changed')+' · '+target:routeText('same')+' · '+target;
+ if(data.raw_error)msg.textContent+=' · '+data.raw_error;
+ if(data.hops.length===0)msg.textContent+=' · '+routeText('no');
+ document.getElementById('routeHops').innerHTML=data.hops.map(h=>'<tr>'+cell(h.hop_number)+cell(h.ip||'—','mono')+cell(h.rtt_ms==null?'—':n(h.rtt_ms,2)+' ms')+cell(h.responded?routeText('yes'):routeText('no'),h.responded?'good':'bad')+'</tr>').join('')||'<tr><td colspan="4" class="empty">'+routeText('none')+'</td></tr>';
+ await loadRouteHistory();
+ }catch(e){msg.textContent=routeText('error')+': '+e.message}
+ finally{btn.disabled=false;btn.textContent=routeText('run')}
+}
+document.addEventListener('DOMContentLoaded',()=>{const m=document.getElementById('routeMessage');if(m)m.dataset.default='1';renderRouteLabels();loadRouteHistory()});
+\nlet activeLanguage='en';try{activeLanguage=localStorage.getItem('dzra-language')||'en'}catch(e){}setLanguage(activeLanguage);
 refreshAll();refreshProgress();setInterval(refreshAll,60000);setInterval(refreshProgress,1500);
 </script></main></body></html>"""
 
