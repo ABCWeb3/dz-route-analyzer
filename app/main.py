@@ -435,6 +435,17 @@ button.primary,#routeIntelligence #routeAnalyzeBtn{
  .panel{padding:16px}
  .chartwrap{height:210px}
 }
+
+/* Data-backed route topology */
+.neon-topology-visual{overflow:auto;min-height:190px;scrollbar-width:thin;scrollbar-color:#263c82 transparent}
+.route-topology-dynamic{width:100%;min-width:0}
+.route-topology-dynamic svg{display:block;width:100%;height:auto;min-height:180px}
+.route-topology-empty{min-height:195px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;color:#8e9fc9;padding:20px}
+.route-topology-empty>span{font-size:30px;color:#40dafa}
+.route-topology-empty strong{color:#e5edff;font-size:14px}
+.route-topology-empty p{max-width:340px;margin:0;font-size:12px;line-height:1.6}
+.route-topology-caption{font-size:11px}
+.route-topology-node{cursor:default}
 </style></head><body><main>
 <header class="top"><div class="brand"><div class="logo">⌁</div><div><h1>DZ Route Analyzer</h1><div class="subtitle">Internet connection intelligence · Algérie Télécom</div></div></div>
 <div class="actions"><select id="languageSelect" aria-label="Language" onchange="setLanguage(this.value)" style="font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:#17243a;color:var(--text);padding:10px 12px;border-radius:11px"><option value="en">🇬🇧 English</option><option value="fr">🇫🇷 Français</option><option value="ar">🇩🇿 العربية</option></select><button onclick="refreshAll()">↻ Refresh</button><button class="primary" id="collectBtn" onclick="collect()">▶ Collect now</button></div></header>
@@ -457,17 +468,8 @@ button.primary,#routeIntelligence #routeAnalyzeBtn{
  <article class="neon-card neon-topology">
   <div class="neon-card-head"><h2>Network connection overview</h2><span class="neon-muted">Illustrative topology</span></div>
   <div class="neon-topology-visual">
-   <svg viewBox="0 0 600 255" role="img" aria-label="Illustration of a device connected through a network to public DNS targets">
-    <defs><linearGradient id="neonPath" x1="0" x2="1"><stop offset="0" stop-color="#158dff"/><stop offset=".52" stop-color="#23e6f0"/><stop offset="1" stop-color="#27f5a0"/></linearGradient><radialGradient id="neonGlow"><stop stop-color="#315cff" stop-opacity=".25"/><stop offset="1" stop-color="#315cff" stop-opacity="0"/></radialGradient><filter id="neonBlur"><feGaussianBlur stdDeviation="5"/></filter></defs>
-    <ellipse cx="300" cy="140" rx="220" ry="98" fill="url(#neonGlow)"/><ellipse cx="300" cy="150" rx="195" ry="75" fill="none" stroke="#172c70" stroke-width="1"/><ellipse cx="300" cy="150" rx="145" ry="55" fill="none" stroke="#1c286b" stroke-width="1"/>
-    <path d="M95 168 C160 168 180 214 255 185 S360 125 420 167 S480 172 510 130" fill="none" stroke="url(#neonPath)" stroke-width="10" opacity=".18" filter="url(#neonBlur)"/><path d="M95 168 C160 168 180 214 255 185 S360 125 420 167 S480 172 510 130" fill="none" stroke="url(#neonPath)" stroke-width="3" stroke-linecap="round"/>
-    <g fill="#1c3b91" stroke="#1b9cff" stroke-width="2"><circle cx="95" cy="168" r="38" fill="#091a46"/><circle cx="510" cy="130" r="38" fill="#071d38" stroke="#2af5a2"/></g>
-    <g stroke="#6acaff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="80" y="149" width="30" height="34" rx="2"/><path d="M87 156h4m5 0h4m5 0h1M87 164h4m5 0h4m5 0h1M87 172h4m5 0h4m5 0h1M92 183v-7h8v7"/></g>
-    <g stroke="#54ffc0" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M490 134a13 13 0 0 1 25-5 11 11 0 0 1 4 22h-30a9 9 0 0 1 1-17z"/></g>
-    <g stroke="#4c6dff" fill="none" stroke-width="1.5" opacity=".8"><path d="M300 43v40M280 63h40"/><circle cx="300" cy="63" r="28"/><circle cx="300" cy="63" r="42"/></g><g fill="#a8b7ff"><circle cx="300" cy="63" r="4"/><circle cx="255" cy="185" r="4" fill="#28e9ef"/><circle cx="420" cy="167" r="4" fill="#38ffb1"/><circle cx="180" cy="195" r="3" fill="#279bff"/></g>
-    <g fill="#a9b7dc" font-size="11" text-anchor="middle"><text x="95" y="222">Your network</text><text x="300" y="119">Internet</text><text x="510" y="184">Public DNS</text></g>
-   </svg>
-  </div><div class="neon-topology-caption">Conceptual illustration — actual hops and addresses are shown in Route Intelligence below.</div>
+   <div id="routeTopologyDynamic" class="route-topology-dynamic" aria-live="polite"><div class="route-topology-empty"><span>◎</span><strong>No route data yet</strong><p>Choose a destination and select “Analyze route” below to discover real hops.</p></div></div>
+  </div><div class="neon-topology-caption">Actual path discovered by traceroute. No route is run automatically.</div>
  </article>
  <article class="neon-card neon-tests">
   <div class="neon-card-head"><h2>Connection tests</h2><span class="neon-muted">Latest collected values</span></div>
@@ -726,8 +728,37 @@ function renderRouteLabels(){
 }
 async function loadRouteHistory(){
  try{const data=await get('/api/routes/history?limit=20');const rows=data.items||[];
+ if(rows.length){renderRouteTopology(rows[0]);document.getElementById('routeKpiTarget').textContent=rows[0].target;document.getElementById('routeKpiVendor').textContent=rows[0].target==='1.1.1.1'?'Cloudflare DNS':'Google Public DNS';document.getElementById('routeKpiReach').textContent=rows[0].reached?routeText('reached'):routeText('notReached');document.getElementById('routeKpiHops').textContent=rows[0].hop_count;document.getElementById('routeKpiResponding').textContent=rows[0].hops.filter(h=>h.responded).length+' / '+rows[0].hops.length;document.getElementById('neonTraceroute').innerHTML=esc(rows[0].hop_count)+' hops<small>'+esc(rows[0].reached?'Destination reached':'Destination not confirmed')+'</small>';}
  document.getElementById('routeRuns').innerHTML=rows.map(x=>'<tr>'+cell(date(x.tested_at))+cell(x.target,'mono')+cell(x.hop_count)+cell(String(x.fingerprint||'').slice(0,12),'mono')+cell(x.changed===null||x.changed===undefined?routeText('baseline'):(x.changed?routeText('changed'):routeText('same')))+'</tr>').join('')||'<tr><td colspan="5" class="empty">'+routeText('none')+'</td></tr>';const badge=document.getElementById('routeHistoryCount');if(badge)badge.textContent=rows.length+' '+routeText('runs');
  }catch(e){console.error(e)}
+}
+
+function renderRouteTopology(route){
+ const host=document.getElementById('routeTopologyDynamic');if(!host)return;
+ if(!route||!Array.isArray(route.hops)||route.hops.length===0){
+  host.innerHTML='<div class="route-topology-empty"><span>◎</span><strong>'+esc(activeLanguage==='ar'?'لا توجد بيانات للمسار بعد':activeLanguage==='fr'?'Aucune donnée de route':'No route data yet')+'</strong><p>'+esc(activeLanguage==='ar'?'اختر وجهة ثم اضغط «تحليل المسار» لاكتشاف القفزات الفعلية.':activeLanguage==='fr'?'Choisissez une cible puis lancez l’analyse pour découvrir les sauts réels.':'Choose a destination and select “Analyze route” to discover real hops.')+'</p></div>';
+  return;
+ }
+ const hops=route.hops.slice(0,20),count=hops.length;
+ const width=Math.max(720,120+count*100+90),height=220,startX=55,endX=width-60,step=(endX-startX)/Math.max(1,count);
+ const xFor=i=>startX+(i+1)*step;
+ let lines='',nodes='';
+ const sourceX=35;
+ const destX=endX+step*.58;
+ lines+='<path d="M '+sourceX+' 88 L '+xFor(0)+' 88" stroke="#247fff" stroke-width="3" stroke-linecap="round"/>';
+ hops.forEach((h,i)=>{
+  const x=xFor(i),responded=!!h.responded,stroke=responded?'#28e6c0':'#ffca58',fill=responded?'#0b2441':'#302516';
+  if(i<count-1){const nx=xFor(i+1);lines+='<path d="M '+(x+15)+' 88 L '+(nx-15)+' 88" stroke="'+(responded?'#258cda':'#6b5a32')+'" stroke-width="2.5" '+(responded?'':'stroke-dasharray="5 5"')+' />'}
+  const label=h.ip?esc(h.ip):'No reply',rtt=h.rtt_ms==null?'—':n(h.rtt_ms,1)+' ms';
+  nodes+='<g class="route-topology-node"><circle cx="'+x+'" cy="88" r="17" fill="'+fill+'" stroke="'+stroke+'" stroke-width="2"/><text x="'+x+'" y="93" fill="'+stroke+'" font-size="13" font-weight="700" text-anchor="middle">'+(i+1)+'</text><text x="'+x+'" y="124" fill="#dce8ff" font-size="11" text-anchor="middle">'+label+'</text><text x="'+x+'" y="142" fill="'+stroke+'" font-size="10" text-anchor="middle">'+rtt+'</text><text x="'+x+'" y="160" fill="#879bc7" font-size="10" text-anchor="middle">'+(responded?(activeLanguage==='ar'?'استجابت':activeLanguage==='fr'?'Réponse':'Responded'):(activeLanguage==='ar'?'لا رد':activeLanguage==='fr'?'Sans réponse':'No reply'))+'</text></g>';
+ });
+ const lastX=count?xFor(count-1):sourceX;
+ lines+='<path d="M '+(lastX+17)+' 88 L '+(destX-19)+' 88" stroke="'+(route.reached?'#2bf1a2':'#5572b5')+'" stroke-width="3" stroke-linecap="round" '+(route.reached?'':'stroke-dasharray="5 5"')+'/>';
+ const target=route.target||document.getElementById('routeTarget').value;
+ const sourceLabel=activeLanguage==='ar'?'شبكتك':activeLanguage==='fr'?'Votre réseau':'Your network';
+ const destLabel=activeLanguage==='ar'?'الوجهة':activeLanguage==='fr'?'Destination':'Destination';
+ const status=route.reached?(activeLanguage==='ar'?'تم الوصول':activeLanguage==='fr'?'Atteinte':'Reached'):(activeLanguage==='ar'?'لم يُؤكد الوصول':activeLanguage==='fr'?'Non confirmée':'Not confirmed');
+ host.innerHTML='<svg style="width:'+width+'px;max-width:none" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="'+esc('Traceroute '+target)+'"><defs><linearGradient id="routeLiveLine" x1="0" x2="1"><stop stop-color="#2585ff"/><stop offset="1" stop-color="#27efa6"/></linearGradient></defs><text x="'+sourceX+'" y="45" fill="#c9d8ff" font-size="11" text-anchor="start">'+esc(sourceLabel)+'</text><circle cx="'+sourceX+'" cy="88" r="13" fill="#0a1e43" stroke="#239dff" stroke-width="2"/><path d="M '+(sourceX-5)+' 84h10m-10 5h10m-10 5h10" stroke="#7edaff" stroke-width="1.5"/>'+lines+nodes+'<circle cx="'+destX+'" cy="88" r="18" fill="#082b2b" stroke="'+(route.reached?'#2bf1a2':'#6981c4')+'" stroke-width="2"/><circle cx="'+destX+'" cy="88" r="6" fill="'+(route.reached?'#2bf1a2':'#6981c4')+'"/><text x="'+destX+'" y="124" fill="#e4edff" font-size="11" text-anchor="middle">'+esc(target)+'</text><text x="'+destX+'" y="142" fill="'+(route.reached?'#2bf1a2':'#91a2cc')+'" font-size="10" text-anchor="middle">'+esc(status)+'</text><text x="'+sourceX+'" y="187" fill="#8498c9" font-size="10">'+esc(activeLanguage==='ar'?'القفزات المكتشفة':activeLanguage==='fr'?'Sauts détectés':'Discovered hops')+': '+count+'</text><text x="'+destX+'" y="187" fill="#8498c9" font-size="10" text-anchor="end">'+esc(activeLanguage==='ar'?'الوجهة':activeLanguage==='fr'?'Cible':'Target')+'</text></svg>';
 }
 async function analyzeRoute(){
  const btn=document.getElementById('routeAnalyzeBtn'),target=document.getElementById('routeTarget').value,msg=document.getElementById('routeMessage');
@@ -736,6 +767,8 @@ async function analyzeRoute(){
  const response=await fetch('/api/routes/analyze?target='+encodeURIComponent(target),{method:'POST'});
  const data=await response.json();if(!response.ok)throw new Error(data.detail||routeText('error'));
  msg.textContent=(data.changed===null?routeText('baseline'):(data.changed?routeText('changed'):routeText('same')))+' · '+target;
+ renderRouteTopology(data);
+ document.getElementById('neonTraceroute').innerHTML=esc(data.hop_count??data.hops.length)+' hops<small>'+esc(data.reached?(activeLanguage==='ar'?'تم الوصول':activeLanguage==='fr'?'Atteinte':'Destination reached'):(activeLanguage==='ar'?'لم يؤكد الوصول':activeLanguage==='fr'?'Non confirmée':'Destination not confirmed'))+'</small>';
  document.getElementById('routeKpiTarget').textContent=target;document.getElementById('routeKpiVendor').textContent=target==='1.1.1.1'?'Cloudflare DNS':'Google Public DNS';document.getElementById('routeKpiReach').textContent=data.reached?routeText('reached'):routeText('notReached');document.getElementById('routeKpiHops').textContent=data.hop_count??data.hops.length;document.getElementById('routeKpiResponding').textContent=data.hops.filter(h=>h.responded).length+' / '+data.hops.length;
  if(data.raw_error)msg.textContent+=' · '+data.raw_error;
  if(data.hops.length===0)msg.textContent+=' · '+routeText('no');
