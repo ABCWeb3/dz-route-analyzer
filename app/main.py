@@ -437,8 +437,8 @@ button.primary,#routeIntelligence #routeAnalyzeBtn{
 }
 
 /* Data-backed route topology */
-.neon-topology-visual{overflow:auto;min-height:190px;scrollbar-width:thin;scrollbar-color:#263c82 transparent}
-.route-topology-dynamic{width:100%;min-width:0}
+.neon-topology-visual{overflow-x:auto;overflow-y:hidden;min-height:190px;scrollbar-width:thin;scrollbar-color:#263c82 transparent;scroll-behavior:smooth;overscroll-behavior-x:contain}
+.route-topology-dynamic{width:max-content;min-width:100%}
 .route-topology-dynamic svg{display:block;width:100%;height:auto;min-height:180px}
 .route-topology-empty{min-height:195px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;color:#8e9fc9;padding:20px}
 .route-topology-empty>span{font-size:30px;color:#40dafa}
@@ -466,7 +466,7 @@ button.primary,#routeIntelligence #routeAnalyzeBtn{
   <div id="neonAlerts"><div class="neon-alert"><span class="neon-alert-icon">◌</span><div><strong>Waiting for measurements</strong><p>Run a collection to evaluate connection health.</p></div></div></div>
  </article>
  <article class="neon-card neon-topology">
-  <div class="neon-card-head"><h2>Network connection overview</h2><span class="neon-muted">Illustrative topology</span></div>
+  <div class="neon-card-head"><h2>Network connection overview</h2><span class="neon-muted">Actual network route</span></div>
   <div class="neon-topology-visual">
    <div id="routeTopologyDynamic" class="route-topology-dynamic" aria-live="polite"><div class="route-topology-empty"><span>◎</span><strong>No route data yet</strong><p>Choose a destination and select “Analyze route” below to discover real hops.</p></div></div>
   </div><div class="neon-topology-caption">Actual path discovered by traceroute. No route is run automatically.</div>
@@ -740,11 +740,11 @@ function renderRouteTopology(route){
   return;
  }
  const hops=route.hops.slice(0,20),count=hops.length;
- const width=Math.max(720,120+count*100+90),height=220,startX=55,endX=width-60,step=(endX-startX)/Math.max(1,count);
+ const width=Math.max(720,count*100+260),height=220,startX=55,endX=width-150,step=(endX-startX)/Math.max(1,count);
  const xFor=i=>startX+(i+1)*step;
  let lines='',nodes='';
  const sourceX=35;
- const destX=endX+step*.58;
+ const destX=endX+70;
  lines+='<path d="M '+sourceX+' 88 L '+xFor(0)+' 88" stroke="#247fff" stroke-width="3" stroke-linecap="round"/>';
  hops.forEach((h,i)=>{
   const x=xFor(i),responded=!!h.responded,stroke=responded?'#28e6c0':'#ffca58',fill=responded?'#0b2441':'#302516';
@@ -759,6 +759,8 @@ function renderRouteTopology(route){
  const destLabel=activeLanguage==='ar'?'الوجهة':activeLanguage==='fr'?'Destination':'Destination';
  const status=route.reached?(activeLanguage==='ar'?'تم الوصول':activeLanguage==='fr'?'Atteinte':'Reached'):(activeLanguage==='ar'?'لم يُؤكد الوصول':activeLanguage==='fr'?'Non confirmée':'Not confirmed');
  host.innerHTML='<svg style="width:'+width+'px;max-width:none" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="'+esc('Traceroute '+target)+'"><defs><linearGradient id="routeLiveLine" x1="0" x2="1"><stop stop-color="#2585ff"/><stop offset="1" stop-color="#27efa6"/></linearGradient></defs><text x="'+sourceX+'" y="45" fill="#c9d8ff" font-size="11" text-anchor="start">'+esc(sourceLabel)+'</text><circle cx="'+sourceX+'" cy="88" r="13" fill="#0a1e43" stroke="#239dff" stroke-width="2"/><path d="M '+(sourceX-5)+' 84h10m-10 5h10m-10 5h10" stroke="#7edaff" stroke-width="1.5"/>'+lines+nodes+'<circle cx="'+destX+'" cy="88" r="18" fill="#082b2b" stroke="'+(route.reached?'#2bf1a2':'#6981c4')+'" stroke-width="2"/><circle cx="'+destX+'" cy="88" r="6" fill="'+(route.reached?'#2bf1a2':'#6981c4')+'"/><text x="'+destX+'" y="124" fill="#e4edff" font-size="11" text-anchor="middle">'+esc(target)+'</text><text x="'+destX+'" y="142" fill="'+(route.reached?'#2bf1a2':'#91a2cc')+'" font-size="10" text-anchor="middle">'+esc(status)+'</text><text x="'+sourceX+'" y="187" fill="#8498c9" font-size="10">'+esc(activeLanguage==='ar'?'القفزات المكتشفة':activeLanguage==='fr'?'Sauts détectés':'Discovered hops')+': '+count+'</text><text x="'+destX+'" y="187" fill="#8498c9" font-size="10" text-anchor="end">'+esc(activeLanguage==='ar'?'الوجهة':activeLanguage==='fr'?'Cible':'Target')+'</text></svg>';
+ const viewport=host.closest('.neon-topology-visual');
+ if(viewport){requestAnimationFrame(()=>{viewport.scrollLeft=viewport.scrollWidth;});}
 }
 async function analyzeRoute(){
  const btn=document.getElementById('routeAnalyzeBtn'),target=document.getElementById('routeTarget').value,msg=document.getElementById('routeMessage');
