@@ -242,6 +242,7 @@ button:hover{border-color:#5d8de5;transform:translateY(-1px)}button.primary{back
 .barcell{min-width:120px}.barbg{height:5px;border-radius:9px;background:#24324a;overflow:hidden;margin-top:7px}.barfill{height:100%;border-radius:9px;background:linear-gradient(90deg,#5d9cff,#60d8e7)}
 .targetlist{display:grid;gap:11px}.target{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;background:#0b1323;border:1px solid #202e45;border-radius:12px}.targetname{font-size:13px;font-weight:750}.targetsub{font-size:11px;color:var(--muted);margin-top:4px}.targetmetrics{text-align:right}.targetmetrics strong{font-size:15px;display:block}.targetmetrics small{color:var(--muted);font-size:11px}
 .footnote{color:var(--muted);font-size:11px;line-height:1.65;margin-top:16px}.notice{border:1px solid #3b4a65;background:#121f34;padding:13px 15px;border-radius:12px;color:#b8c8df;font-size:12px;line-height:1.6;margin-top:16px}
+#routeIntelligence{position:relative;overflow:hidden;background:linear-gradient(145deg,#14223a,#0d1627);border-color:#2b3d59}#routeIntelligence:before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,#3978f6,#62d8e8)}#routeIntelligence .panelhead{align-items:center;margin-bottom:20px}#routeIntelligence .panelhead>div:first-child{min-width:220px}#routeIntelligence .actions{align-items:center}#routeMessage{font-weight:650;border-color:#344a68;background:#101d31}#routeIntelligence table{min-width:640px}#routeIntelligence th{padding-top:13px;padding-bottom:13px}#routeIntelligence td{padding-top:14px;padding-bottom:14px}#routeHistoryTitle{display:flex;align-items:center;gap:9px}#routeHistoryTitle:before{content:"";width:4px;height:18px;border-radius:4px;background:var(--cyan)}
 @media(max-width:900px){.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.bigstats{grid-template-columns:repeat(2,minmax(0,1fr))}.top{align-items:flex-start;flex-direction:column}.actions{width:100%}}
 @media(max-width:480px){main{padding:18px 12px 35px}.panel{padding:15px;border-radius:15px}.bigstats{gap:8px}.stat{padding:11px}.stat strong{font-size:17px}.ipvalue{font-size:30px}.actions button{flex:1}}
 </style></head><body><main>
@@ -424,9 +425,9 @@ async function collect(){
  finally{clearInterval(poll);b.disabled=false;b.textContent='▶ Collect now';document.querySelector('#statusDot').className='dot';}
 }
 const routeWords={
-en:{title:'Route Intelligence',hint:'Compare network hops over time. Run analysis on demand.',run:'Analyze route',running:'Tracing route…',noRun:'Route analysis has not run yet. No traceroute is performed automatically.',hop:'Hop',ip:'IP address',rtt:'RTT',response:'Response',yes:'Responded',no:'No reply',history:'Recent route runs',time:'Time',count:'Hops',fingerprint:'Fingerprint',change:'Change',changed:'Changed',same:'Unchanged',none:'No route history yet.',safety:'A hop that does not respond may filter traceroute probes. It is not proof of packet loss or ISP fault. Route checks are limited to the two listed public targets.',error:'Route analysis failed'},
-fr:{title:'Intelligence de routage',hint:'Comparez les sauts réseau dans le temps. Lancez une analyse à la demande.',run:'Analyser la route',running:'Traçage en cours…',noRun:'Aucune analyse effectuée. Le traceroute ne démarre pas automatiquement.',hop:'Saut',ip:'Adresse IP',rtt:'RTT',response:'Réponse',yes:'Réponse reçue',no:'Aucune réponse',history:'Analyses récentes',time:'Date',count:'Sauts',fingerprint:'Empreinte',change:'Changement',changed:'Modifiée',same:'Inchangée',none:'Aucun historique de route.',safety:'Un saut silencieux peut filtrer les sondes traceroute. Cela ne prouve ni une perte de paquets ni une faute du FAI. Les tests sont limités aux deux cibles publiques listées.',error:'Échec de l’analyse'},
-ar:{title:'ذكاء المسارات',hint:'قارن قفزات الشبكة عبر الزمن، وشغّل التحليل عند الطلب.',run:'تحليل المسار',running:'جارٍ تتبع المسار…',noRun:'لم يُجرَ تحليل بعد. لن يعمل traceroute تلقائيًا.',hop:'القفزة',ip:'عنوان IP',rtt:'زمن الاستجابة',response:'الاستجابة',yes:'استجابت',no:'لا توجد استجابة',history:'عمليات تحليل المسار الأخيرة',time:'الوقت',count:'القفزات',fingerprint:'بصمة المسار',change:'التغيير',changed:'تغيّر',same:'لم يتغير',none:'لا يوجد سجل للمسارات بعد.',safety:'قد تمنع إحدى القفزات ردود traceroute. هذا لا يثبت فقدان الحزم أو وجود خلل لدى مزود الإنترنت. يقتصر الفحص على العنوانين العامين المعروضين.',error:'فشل تحليل المسار'}
+en:{title:'Route Intelligence',hint:'Compare network hops over time. Run analysis on demand.',run:'Analyze route',running:'Tracing route…',noRun:'Route analysis has not run yet. No traceroute is performed automatically.',hop:'Hop',ip:'IP address',rtt:'RTT',response:'Response',yes:'Responded',no:'No reply',history:'Recent route runs',time:'Time',count:'Hops',fingerprint:'Fingerprint',change:'Change',changed:'Changed',same:'Unchanged',baseline:'Baseline (first sample)',none:'No route history yet.',safety:'A hop that does not respond may filter traceroute probes. It is not proof of packet loss or ISP fault. Route checks are limited to the two listed public targets.',error:'Route analysis failed'},
+fr:{title:'Intelligence de routage',hint:'Comparez les sauts réseau dans le temps. Lancez une analyse à la demande.',run:'Analyser la route',running:'Traçage en cours…',noRun:'Aucune analyse effectuée. Le traceroute ne démarre pas automatiquement.',hop:'Saut',ip:'Adresse IP',rtt:'RTT',response:'Réponse',yes:'Réponse reçue',no:'Aucune réponse',history:'Analyses récentes',time:'Date',count:'Sauts',fingerprint:'Empreinte',change:'Changement',changed:'Modifiée',same:'Inchangée',baseline:'Référence initiale',none:'Aucun historique de route.',safety:'Un saut silencieux peut filtrer les sondes traceroute. Cela ne prouve ni une perte de paquets ni une faute du FAI. Les tests sont limités aux deux cibles publiques listées.',error:'Échec de l’analyse'},
+ar:{title:'ذكاء المسارات',hint:'قارن قفزات الشبكة عبر الزمن، وشغّل التحليل عند الطلب.',run:'تحليل المسار',running:'جارٍ تتبع المسار…',noRun:'لم يُجرَ تحليل بعد. لن يعمل traceroute تلقائيًا.',hop:'القفزة',ip:'عنوان IP',rtt:'زمن الاستجابة',response:'الاستجابة',yes:'استجابت',no:'لا توجد استجابة',history:'عمليات تحليل المسار الأخيرة',time:'الوقت',count:'القفزات',fingerprint:'بصمة المسار',change:'التغيير',changed:'تغيّر',same:'لم يتغير',baseline:'القياس المرجعي الأول',none:'لا يوجد سجل للمسارات بعد.',safety:'قد تمنع إحدى القفزات ردود traceroute. هذا لا يثبت فقدان الحزم أو وجود خلل لدى مزود الإنترنت. يقتصر الفحص على العنوانين العامين المعروضين.',error:'فشل تحليل المسار'}
 };
 function routeText(key){return (routeWords[activeLanguage]||routeWords.en)[key]||routeWords.en[key]||key}
 function renderRouteLabels(){
@@ -436,7 +437,7 @@ function renderRouteLabels(){
 }
 async function loadRouteHistory(){
  try{const data=await get('/api/routes/history?limit=20');const rows=data.items||[];
- document.getElementById('routeRuns').innerHTML=rows.map(x=>'<tr>'+cell(date(x.tested_at))+cell(x.target,'mono')+cell(x.hop_count)+cell(String(x.fingerprint||'').slice(0,12),'mono')+cell(x.changed?routeText('changed'):routeText('same'))+'</tr>').join('')||'<tr><td colspan="5" class="empty">'+routeText('none')+'</td></tr>';
+ document.getElementById('routeRuns').innerHTML=rows.map(x=>'<tr>'+cell(date(x.tested_at))+cell(x.target,'mono')+cell(x.hop_count)+cell(String(x.fingerprint||'').slice(0,12),'mono')+cell(x.changed===null||x.changed===undefined?routeText('baseline'):(x.changed?routeText('changed'):routeText('same')))+'</tr>').join('')||'<tr><td colspan="5" class="empty">'+routeText('none')+'</td></tr>';
  }catch(e){console.error(e)}
 }
 async function analyzeRoute(){
@@ -445,7 +446,7 @@ async function analyzeRoute(){
  try{
  const response=await fetch('/api/routes/analyze?target='+encodeURIComponent(target),{method:'POST'});
  const data=await response.json();if(!response.ok)throw new Error(data.detail||routeText('error'));
- msg.textContent=data.changed?routeText('changed')+' · '+target:routeText('same')+' · '+target;
+ msg.textContent=(data.changed===null?routeText('baseline'):(data.changed?routeText('changed'):routeText('same')))+' · '+target;
  if(data.raw_error)msg.textContent+=' · '+data.raw_error;
  if(data.hops.length===0)msg.textContent+=' · '+routeText('no');
  document.getElementById('routeHops').innerHTML=data.hops.map(h=>'<tr>'+cell(h.hop_number)+cell(h.ip||'—','mono')+cell(h.rtt_ms==null?'—':n(h.rtt_ms,2)+' ms')+cell(h.responded?routeText('yes'):routeText('no'),h.responded?'good':'bad')+'</tr>').join('')||'<tr><td colspan="4" class="empty">'+routeText('none')+'</td></tr>';
@@ -580,7 +581,7 @@ def analyze_route(target: str = Query(default="1.1.1.1")) -> dict[str, Any]:
                  "Hop IP sequence changed; non-responding hops are not proof of packet loss or ISP fault.")
             )
     return {**result, "id": run_id, "tested_at": tested_at, "previous_fingerprint": previous["fingerprint"] if previous else None,
-            "changed": bool(previous and previous["fingerprint"] != result["fingerprint"]), "change": change,
+            "changed": None if previous is None else previous["fingerprint"] != result["fingerprint"], "change": change,
             "interpretation_note": "Traceroute hops that do not reply may filter diagnostic traffic. This alone does not prove packet loss or an ISP fault."}
 
 
@@ -604,7 +605,7 @@ def route_history(target: str | None = Query(default=None), limit: int = Query(d
                 "SELECT fingerprint FROM route_runs WHERE target=? AND id<? ORDER BY id DESC LIMIT 1",
                 (row["target"], row["id"])
             ).fetchone()
-            item["changed"] = bool(previous and previous["fingerprint"] != row["fingerprint"])
+            item["changed"] = None if previous is None else previous["fingerprint"] != row["fingerprint"]
             items.append(item)
         events = [dict(event) for event in db.execute(
             "SELECT * FROM route_events ORDER BY id DESC LIMIT 100"
