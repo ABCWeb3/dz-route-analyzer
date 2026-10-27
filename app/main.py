@@ -341,7 +341,7 @@ function setLanguage(lang){
  document.querySelectorAll('td').forEach(el=>el.style.textAlign=lang==='ar'?'right':'left');
  const select=document.querySelector('#languageSelect');if(select&&select.value!==lang)select.value=lang;
  try{localStorage.setItem('dzra-language',lang)}catch(e){}
- translatePage(lang);
+ activeLanguage=lang;translatePage(lang);if(typeof renderRouteLabels==='function')renderRouteLabels();
 }
 function translatePage(lang){
  const dict=translations[lang]||translations.en;
@@ -599,6 +599,11 @@ def route_history(target: str | None = Query(default=None), limit: int = Query(d
                 "SELECT hop_number,ip,rtt_ms,responded FROM route_hops WHERE route_run_id=? ORDER BY hop_number",
                 (row["id"],)
             ).fetchall()]
+            previous = db.execute(
+                "SELECT fingerprint FROM route_runs WHERE target=? AND id<? ORDER BY id DESC LIMIT 1",
+                (row["target"], row["id"])
+            ).fetchone()
+            item["changed"] = bool(previous and previous["fingerprint"] != row["fingerprint"])
             items.append(item)
         events = [dict(event) for event in db.execute(
             "SELECT * FROM route_events ORDER BY id DESC LIMIT 100"
